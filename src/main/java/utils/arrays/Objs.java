@@ -1,4 +1,4 @@
-package arrays;
+package utils.arrays;
 
 import static java.lang.Math.min;
 
@@ -15,6 +15,7 @@ import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Objs {
@@ -299,5 +300,15 @@ public class Objs {
 
 	public static <T> T[] union(T[] a, T[] b) {
 		return foldl(b, a, Objs::union);
+	}
+
+	/** Breaks an array up into groups of size length and streams them. If the 
+	 * array length is not a multiple of size, the remainder elements will be 
+	 * discarded */
+	public static <T> Stream<T[]> streamGroups(int size, T[] from) {
+		return from==null ? Stream.empty() 
+//JAVA9:			iterate(0, i->i<from.length, i->i+=size)
+				: IntStream.range(0, from.length/size).map(i->i*size)
+					.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
 	}
 }

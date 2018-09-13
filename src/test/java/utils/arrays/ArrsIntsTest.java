@@ -1,9 +1,4 @@
-package arrays;
-
-import static arrays.Arrs.*;
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+package utils.arrays;
 
 public class ArrsIntsTest {
 

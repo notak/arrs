@@ -1,4 +1,4 @@
-package arrays;
+package utils.arrays;
 
 import static java.lang.Math.min;
 
@@ -16,6 +16,16 @@ import java.util.stream.Stream;
 
 public class Bytes {
 	@FunctionalInterface
+	public static interface UnaryOp{
+		public byte apply(byte a);
+	}
+
+	@FunctionalInterface
+	public static interface BinaryOp {
+		public byte apply(byte a, byte b);
+	}
+
+	@FunctionalInterface
 	public static interface Consumer {
 		void accept(byte val);
 	}
@@ -23,6 +33,11 @@ public class Bytes {
 	@FunctionalInterface
 	public static interface Pred {
 		boolean test(byte val);
+	}
+	
+	@FunctionalInterface
+	public static interface BiPred {
+		boolean test(byte val, byte val2);
 	}
 	
 	@FunctionalInterface
@@ -270,5 +285,15 @@ public class Bytes {
 
 	public static byte[] union(byte[] a, byte[] b) {
 		return foldl(b, a, Bytes::union);
+	}
+
+	/** Breaks an array up into groups of size length and streams them. If the 
+	 * array length is not a multiple of size, the remainder elements will be 
+	 * discarded */
+	public static <T> Stream<byte[]> streamGroups(int size, byte[] from) {
+		return from==null ? Stream.empty() 
+			//JAVA9:			iterate(0, i->i<from.length, i->i+=size)
+			: IntStream.range(0, from.length/size).map(i->i*size)
+				.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
 	}
 }

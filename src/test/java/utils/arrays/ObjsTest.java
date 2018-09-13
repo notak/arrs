@@ -1,13 +1,25 @@
-package arrays;
+package utils.arrays;
 
-import static arrays.Objs.*;
 import static org.junit.Assert.*;
+import static utils.arrays.Objs.*;
+
+import java.util.Arrays;
 
 import org.junit.Test;
 
-import arrays.Objs;
+import utils.arrays.Ints;
+import utils.arrays.Objs;
 
 public class ObjsTest {
+	@Test
+	public void testStreamGroups() {
+		String[] s = toArray("A", "B", "C", "D", "E", "F", "G", "H");
+		String[][] ss = streamGroups(3, s).toArray(i->new String[i][]);
+		assertArrayEquals(Arrays.copyOfRange(s, 0, 3), ss[0]);
+		assertArrayEquals(Arrays.copyOfRange(s, 3, 6), ss[1]);
+		assertEquals(0, streamGroups(3, new String[0]).count());
+	}
+
 
 	@Test
 	public void testGettingCoverageTo100() {

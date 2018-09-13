@@ -1,13 +1,26 @@
-package arrays;
+package utils.arrays;
 
-import static arrays.Bytes.*;
 import static org.junit.Assert.*;
+import static utils.arrays.Bytes.*;
+
+import java.util.Arrays;
 
 import org.junit.Test;
 
-import arrays.Objs;
+import utils.arrays.Bytes;
+import utils.arrays.Ints;
+import utils.arrays.Objs;
 
 public class BytesTest {
+	@Test
+	public void testStreamGroups() {
+		byte[] b2 = { 0x01, (byte)0xFF, 0x45, 0x23, 0x24, 0x34, 0x56 };
+		byte[][] g = streamGroups(3, b2).toArray(i->new byte[i][]);
+		assertArrayEquals(Arrays.copyOfRange(b2, 0, 3), g[0]);
+		assertArrayEquals(Arrays.copyOfRange(b2, 3, 6), g[1]);
+		assertEquals(0, streamGroups(3, Bytes.EMPTY).count());
+	}
+
 
 	@Test
 	public void testGettingCoverageTo100() {

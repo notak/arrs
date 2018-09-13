@@ -1,13 +1,14 @@
-package arrays;
+package utils.arrays;
 
-import static arrays.Ints.*;
 import static org.junit.Assert.*;
+import static utils.arrays.Ints.*;
 
 import java.util.Arrays;
 
 import org.junit.Test;
 
-import arrays.Objs;
+import utils.arrays.Ints;
+import utils.arrays.Objs;
 
 public class IntsTest {
 

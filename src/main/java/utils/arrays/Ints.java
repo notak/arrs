@@ -1,4 +1,4 @@
-package arrays;
+package utils.arrays;
 
 import static java.lang.Math.min;
 
@@ -11,6 +11,7 @@ import static java.util.stream.Collectors.joining;
 import java.util.OptionalInt;
 import java.util.function.BiFunction;
 import java.util.function.IntFunction;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Ints {
@@ -22,6 +23,11 @@ public class Ints {
 	@FunctionalInterface
 	public static interface Pred {
 		boolean test(int val);
+	}
+	
+	@FunctionalInterface
+	public static interface BiPred {
+		boolean test(int val, int val2);
 	}
 	
 	@FunctionalInterface
@@ -259,5 +265,15 @@ public class Ints {
 
 	public static int[] union(int[] a, int[] b) {
 		return foldl(b, a, Ints::union);
+	}
+
+	/** Breaks an array up into groups of size length and streams them. If the 
+	 * array length is not a multiple of size, the remainder elements will be 
+	 * discarded */
+	public static <T> Stream<int[]> streamGroups(int size, int[] from) {
+		return from==null ? Stream.empty() 
+			//JAVA9:			iterate(0, i->i<from.length, i->i+=size)
+			: IntStream.range(0, from.length/size).map(i->i*size)
+				.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
 	}
 }

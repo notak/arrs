@@ -1,14 +1,13 @@
-package arrays;
+package utils.arrays;
 
-import static arrays.Longs.EMPTY;
-import static arrays.Ints.EMPTY;
-import static arrays.Longs.*;
 import static org.junit.Assert.*;
+import static utils.arrays.Longs.*;
 
 import org.junit.Test;
 
-import arrays.Ints;
-import arrays.Objs;
+import utils.arrays.Ints;
+import utils.arrays.Longs;
+import utils.arrays.Objs;
 
 public class LongsTest {
 
