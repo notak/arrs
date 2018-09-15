@@ -296,4 +296,42 @@ public class Shorts {
 			: IntStream.range(0, from.length/size).map(i->i*size)
 				.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
 	}
+
+	@FunctionalInterface
+	public static interface HeadTailFn<T> {
+		public T apply(short head, short[] tail);
+	}
+
+	@FunctionalInterface
+	public static interface HeadHeadTailFn<T> {
+		public T apply(short head, short subHead, short[] tail);
+	}
+
+	/** Apply a mapping function which expects the array to be broken shorto
+	 * a single leading short and an array of the remaining shorts
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than one element */
+	public static <T> Optional<T> headTailMap(short[] arr, HeadTailFn<T> map) {
+		return arr.length<1 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], subArray(arr, 1)));
+	}
+	
+	/** Apply a mapping function which expects the first two items of the array  
+	 * with the tail dumped.
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than two elements */
+	public static <T> Optional<T> headHeadMap(short[] arr, BiFn<T> map) {
+		return arr.length<2 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], arr[1]));
+	}
+
+	/** Apply a mapping function which expects the array to be broken shorto
+	 * two leading shorts and an array of the remaining shorts
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than two elements */
+	public static <T> Optional<T> 
+	headHeadTailMap(short[] arr, HeadHeadTailFn<T> map) {
+		return arr.length<2 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], arr[1], subArray(arr, 2)));
+	}
 }

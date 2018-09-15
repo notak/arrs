@@ -3,6 +3,8 @@ package utils.arrays;
 import static java.lang.Math.min;
 
 import java.util.Arrays;
+import java.util.Optional;
+
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.stream;
@@ -13,6 +15,10 @@ import java.util.function.BiFunction;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import utils.arrays.Bytes.BiFn;
+import utils.arrays.Bytes.HeadHeadTailFn;
+import utils.arrays.Bytes.HeadTailFn;
 
 public class Ints {
 	@FunctionalInterface
@@ -224,6 +230,10 @@ public class Ints {
 		return out;
 	}
 
+	/** Produce an array where each element is based on mapping its
+	 *  value and the value before it. The first value is paired with
+	 *  the value provided in ident. Can't think of a use apart from
+	 *  calculating diffs */
 	public static int[] pairLeft(int[] in, int ident, BiFn<Integer> pair) {
 		int[] out = new int[in.length];
 		for (int i=in.length-1; i>=0; i--) {
@@ -275,5 +285,43 @@ public class Ints {
 			//JAVA9:			iterate(0, i->i<from.length, i->i+=size)
 			: IntStream.range(0, from.length/size).map(i->i*size)
 				.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
+	}
+
+	@FunctionalInterface
+	public static interface HeadTailFn<T> {
+		public T apply(int head, int[] tail);
+	}
+
+	@FunctionalInterface
+	public static interface HeadHeadTailFn<T> {
+		public T apply(int head, int subHead, int[] tail);
+	}
+
+	/** Apply a mapping function which expects the array to be broken into
+	 * a single leading int and an array of the remaining ints
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than one element */
+	public static <T> Optional<T> headTailMap(int[] arr, HeadTailFn<T> map) {
+		return arr.length<1 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], subArray(arr, 1)));
+	}
+	
+	/** Apply a mapping function which expects the first two items of the array  
+	 * with the tail dumped.
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than two elements */
+	public static <T> Optional<T> headHeadMap(int[] arr, BiFn<T> map) {
+		return arr.length<2 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], arr[1]));
+	}
+
+	/** Apply a mapping function which expects the array to be broken into
+	 * two leading ints and an array of the remaining ints
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than two elements */
+	public static <T> Optional<T> 
+	headHeadTailMap(int[] arr, HeadHeadTailFn<T> map) {
+		return arr.length<2 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], arr[1], subArray(arr, 2)));
 	}
 }

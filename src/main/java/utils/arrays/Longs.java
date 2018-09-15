@@ -3,6 +3,8 @@ package utils.arrays;
 import static java.lang.Math.min;
 
 import java.util.Arrays;
+import java.util.Optional;
+
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.stream;
@@ -13,6 +15,10 @@ import java.util.function.BiFunction;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import utils.arrays.Ints.BiFn;
+import utils.arrays.Ints.HeadHeadTailFn;
+import utils.arrays.Ints.HeadTailFn;
 
 public class Longs {
 	@FunctionalInterface
@@ -275,5 +281,43 @@ public class Longs {
 			//JAVA9:			iterate(0, i->i<from.length, i->i+=size)
 			: IntStream.range(0, from.length/size).map(i->i*size)
 				.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
+	}
+
+	@FunctionalInterface
+	public static interface HeadTailFn<T> {
+		public T apply(long head, long[] tail);
+	}
+
+	@FunctionalInterface
+	public static interface HeadHeadTailFn<T> {
+		public T apply(long head, long subHead, long[] tail);
+	}
+
+	/** Apply a mapping function which expects the array to be broken longo
+	 * a single leading long and an array of the remaining longs
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than one element */
+	public static <T> Optional<T> headTailMap(long[] arr, HeadTailFn<T> map) {
+		return arr.length<1 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], subArray(arr, 1)));
+	}
+	
+	/** Apply a mapping function which expects the first two items of the array  
+	 * with the tail dumped.
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than two elements */
+	public static <T> Optional<T> headHeadMap(long[] arr, BiFn<T> map) {
+		return arr.length<2 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], arr[1]));
+	}
+
+	/** Apply a mapping function which expects the array to be broken longo
+	 * two leading longs and an array of the remaining longs
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than two elements */
+	public static <T> Optional<T> 
+	headHeadTailMap(long[] arr, HeadHeadTailFn<T> map) {
+		return arr.length<2 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], arr[1], subArray(arr, 2)));
 	}
 }

@@ -311,4 +311,42 @@ public class Objs {
 				: IntStream.range(0, from.length/size).map(i->i*size)
 					.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
 	}
+
+	@FunctionalInterface
+	public static interface HeadTailFn<T, U> {
+		public T apply(U head, U[] tail);
+	}
+
+	@FunctionalInterface
+	public static interface HeadHeadTailFn<T, U> {
+		public T apply(U head, U subHead, U[] tail);
+	}
+
+	/** Apply a mapping function which expects the array to be broken longo
+	 * a single leading long and an array of the remaining longs
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than one element */
+	public static <T, U> Optional<T> headTailMap(U[] arr, HeadTailFn<T, U> map) {
+		return arr.length<1 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], subArray(arr, 1)));
+	}
+	
+	/** Apply a mapping function which expects the first two items of the array  
+	 * with the tail dumped.
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than two elements */
+	public static <T, U> Optional<T> headHeadMap(U[] arr, BiFunction<U, U, T> map) {
+		return arr.length<2 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], arr[1]));
+	}
+
+	/** Apply a mapping function which expects the array to be broken longo
+	 * two leading longs and an array of the remaining longs
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than two elements */
+	public static <T, U> Optional<T> 
+	headHeadTailMap(U[] arr, HeadHeadTailFn<T, U> map) {
+		return arr.length<2 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], arr[1], subArray(arr, 2)));
+	}
 }

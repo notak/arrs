@@ -296,4 +296,42 @@ public class Bytes {
 			: IntStream.range(0, from.length/size).map(i->i*size)
 				.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
 	}
+	
+	@FunctionalInterface
+	public static interface HeadTailFn<T> {
+		public T apply(byte head, byte[] tail);
+	}
+
+	@FunctionalInterface
+	public static interface HeadHeadTailFn<T> {
+		public T apply(byte head, byte subHead, byte[] tail);
+	}
+
+	/** Apply a mapping function which expects the array to be broken into
+	 * a single leading byte and an array of the remaining bytes
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than one element */
+	public static <T> Optional<T> headTailMap(byte[] arr, HeadTailFn<T> map) {
+		return arr.length<1 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], subArray(arr, 1)));
+	}
+	
+	/** Apply a mapping function which expects the first two items of the array  
+	 * with the tail dumped.
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than two elements */
+	public static <T> Optional<T> headHeadMap(byte[] arr, BiFn<T> map) {
+		return arr.length<2 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], arr[1]));
+	}
+
+	/** Apply a mapping function which expects the array to be broken into
+	 * two leading bytes and an array of the remaining bytes
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than two elements */
+	public static <T> Optional<T> 
+	headHeadTailMap(byte[] arr, HeadHeadTailFn<T> map) {
+		return arr.length<2 ? Optional.empty() :
+			Optional.of(map.apply(arr[0], arr[1], subArray(arr, 2)));
+	}
 }

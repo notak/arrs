@@ -7,17 +7,14 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import utils.stuff.Fns.SideEffect;
+
 /** Used to wrap non-fluent interfaces and make them fluent or to chain 
  * operations. This allows you to act on normal objects like they are
  * Optionals, but with a range of conditional actions on parameters as well
  * <p>Use this class sparingly - the results are often less clear than
  * just writing the code in a procedural style */
 public class Chain<T> {
-	
-	@FunctionalInterface
-	public static interface SideEffect {
-		public void act();
-	}
 	
 	private T wraps;
 	
@@ -37,7 +34,7 @@ public class Chain<T> {
 	/** Perform an action which doesn't modify the contents of the chain */
 	public Chain<T> 
 	chain(SideEffect action) {
-		action.act();
+		action.send();
 		return this;
 	}
 	
