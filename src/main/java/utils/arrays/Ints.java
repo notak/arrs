@@ -1,26 +1,38 @@
 package utils.arrays;
 
 import static java.lang.Math.min;
+import static java.lang.System.arraycopy;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Optional;
-
+	
+import static java.util.Arrays.asList;
+import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.sort;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 
 import java.util.OptionalInt;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import utils.arrays.Bytes.BiFn;
-import utils.arrays.Bytes.HeadHeadTailFn;
-import utils.arrays.Bytes.HeadTailFn;
-
 public class Ints {
+	@FunctionalInterface
+	public static interface UnaryOp{
+		public int apply(int a);
+	}
+
+	@FunctionalInterface
+	public static interface BinaryOp {
+		public int apply(int a, int b);
+	}
+
 	@FunctionalInterface
 	public static interface Consumer {
 		void accept(int val);
@@ -76,7 +88,13 @@ public class Ints {
 	
 	/** Optionally get the nth element, returns empty for array len<n+1 */
 	public static OptionalInt nth(int[] in, int n) { 
-		return okPos(in, n) ? OptionalInt.of(in[n]) : OptionalInt.empty();
+		return okPos(in, n) 
+			? OptionalInt.of(in[n]) : OptionalInt.empty();
+	}
+
+	/** get the nth element, returns def for array len<n+1 */
+	public static int nth(int[] in, int n, int def) { 
+		return okPos(in, n) ? in[n] : def;
 	}
 
 	/** Optionally get the nth element from the end (empty if array len<n+1) */
@@ -84,11 +102,26 @@ public class Ints {
 		return nth(in, in.length-(n+1));
 	}
 	
+	/** Optionally get the nth element from the end (empty if array len<n+1) */
+	public static int nthLast(int[] in, int n, int def) {
+		return nth(in, in.length-(n+1), def);
+	}
+	
 	/** Optionally get the first element, returning empty for an empty array */
 	public static OptionalInt first(int[] in) { return nth(in, 0); }
 	
+	/** Get the first element, or returning the provided default */
+	public static int first(int[] in, int def) { 
+		return nth(in, 0, def); 
+	}
+	
 	/** Optionally get the last element, returns empty for empty array */
 	public static OptionalInt last(int[] in) { return nthLast(in, 0); }
+
+	/** Get the last element, or returning the provided default */
+	public static int last(int[] in, int def) { 
+		return nthLast(in, 0, def); 
+	}
 
 	/** Maps an array of ints to an array of T */ 
 	public static <T> T[] 
@@ -113,8 +146,8 @@ public class Ints {
 	}
 
 	/** Maps an array of ints to an array of ints */ 
-	public static long[] mapLong(int[] in, ToLongFn mapper) {
-		var out = new long[in.length];
+	public static int[] mapInt(int[] in, ToIntFn mapper) {
+		var out = new int[in.length];
 		for (int i=0; i<in.length; i++) out[i]=mapper.apply(in[i]);
 		return out;
 	}
@@ -136,7 +169,14 @@ public class Ints {
 		else if (pos+len>=in.length) return copyOfRange(in, 0, pos);
 		
 		int[] out = copyOfRange(in, 0, in.length-len);
-		for (int i=pos; i<out.length; i++) out[i] = in[i+len];
+		arraycopy(in, pos+len, out, pos, out.length-pos);
+		return out;
+	}
+	
+	public static int[] insert(int[] in, int pos, int item) {
+		int[] out = copyOfRange(in, 0, in.length+1);
+		arraycopy(in, pos, out, pos+1, in.length-pos);
+		out[pos] = item;
 		return out;
 	}
 	
@@ -220,7 +260,15 @@ public class Ints {
 		return foldl(in, (int)0, (i, s)->(int)(i+s));
 	}
 
-	/**Pair up elements in the array and map the pairs to a new value */
+	
+	public static int max(int[] in) {
+		return foldl(in, (int)0, Math::max);
+	}
+	
+
+	/**Pair up elements in the array and map the pairs to a new value.
+	 * If there are an odd number of elements, the last one will be ignored
+	 * */
 	public static <T, U> int[] pair(int[] in, ToIntBiFn pair) {
 		if (in.length==0) return in;
 		int[] out = new int[in.length/2];
@@ -230,10 +278,6 @@ public class Ints {
 		return out;
 	}
 
-	/** Produce an array where each element is based on mapping its
-	 *  value and the value before it. The first value is paired with
-	 *  the value provided in ident. Can't think of a use apart from
-	 *  calculating diffs */
 	public static int[] pairLeft(int[] in, int ident, BiFn<Integer> pair) {
 		int[] out = new int[in.length];
 		for (int i=in.length-1; i>=0; i--) {
@@ -259,7 +303,7 @@ public class Ints {
 	public static int[] append(int[] a, int[] b) {
 		if (a.length==0) return b; else if (b.length==0) return a;
 		int[] out = Arrays.copyOf(a, a.length + b.length);
-		for (int i=0; i<b.length; i++) out[a.length+i] = b[i];
+		arraycopy(b, 0, out, a.length, b.length);
 		return out;
 	}
 	
@@ -282,11 +326,10 @@ public class Ints {
 	 * discarded */
 	public static <T> Stream<int[]> streamGroups(int size, int[] from) {
 		return from==null ? Stream.empty() 
-			//JAVA9:			iterate(0, i->i<from.length, i->i+=size)
-			: IntStream.range(0, from.length/size).map(i->i*size)
-				.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
+			: IntStream.iterate(0, i->i<from.length, i->i+=size)
+				.mapToObj(i->copyOfRange(from, i, i+size));
 	}
-
+	
 	@FunctionalInterface
 	public static interface HeadTailFn<T> {
 		public T apply(int head, int[] tail);
@@ -323,5 +366,128 @@ public class Ints {
 	headHeadTailMap(int[] arr, HeadHeadTailFn<T> map) {
 		return arr.length<2 ? Optional.empty() :
 			Optional.of(map.apply(arr[0], arr[1], subArray(arr, 2)));
+	}
+
+	public static class ObjMap<T> {
+		private int[] keys = EMPTY;
+		private T[] vals;
+		public final IntFunction<T[]> cons;
+		
+		public ObjMap(IntFunction<T[]> cons) {
+			this.cons = cons;
+			vals = cons.apply(0);
+		}
+
+		public T put(int key, T val) {
+			var pos = binarySearch(keys, key);
+			if (pos>=0) {
+				var out = vals[pos];
+				vals[pos] = val;
+				return out;
+			} else {
+				pos = -(pos+1);
+				keys = insert(keys, pos, key);
+				vals = Objs.insert(vals, pos, val);
+				return null;
+			}
+		}
+		
+		public T remove(int key) {
+			var pos = binarySearch(keys, key);
+			if (pos<0) return null;
+			var out = vals[pos];
+			keys = spliced(keys, pos, 1);
+			vals = Objs.spliced(vals, pos, 1);
+			return out;
+		}
+		
+		public T get(int key) {
+			return getOrDefault(key, null);
+		}
+		
+		public T getOrDefault(int key, T def) {
+			var pos = binarySearch(keys, key);
+			return pos>=0 ? vals[pos] : def;
+		}
+		
+		public boolean containsKey(int key) {
+			return binarySearch(keys, key)>=0;
+		}
+		
+		public T computeIfAbsent(int key, Fn<T> gen) {
+			var pos = binarySearch(keys, key);
+			if (pos>=0) return vals[pos];
+			var val = gen.apply(key);
+			pos = -(pos+1);
+			keys = insert(keys, pos, key);
+			vals = Objs.insert(vals, pos, val);
+			return val;
+		}
+		
+		public void clear() {
+			keys = EMPTY;
+			vals = cons.apply(0);
+		}
+		
+		public int[] keys() {
+			return keys.clone();
+		}
+		
+		public IntStream streamKeys() {
+			return stream(keys);
+		}
+		
+		public T[] vals() {
+			return vals.clone();
+		}
+
+		public Stream<T> streamVals() {
+			return Arrays.stream(vals);
+		}
+
+		public static class Entry<T> {
+			public final int key;
+			public final T val;
+
+			public Entry(int key, T val) {
+				this.key = key;
+				this.val = val;
+			}
+		}
+		
+		public Stream<Entry<T>> streamEntries() {
+			return IntStream.range(0, keys.length)
+				.mapToObj(i->new Entry<>(keys[i], vals[i]));
+		}
+
+		public Iterator<T> iterVals() {
+			return asList(vals).iterator();
+		}
+		
+		public void forEach(BiConsumer<Integer, T> action) {
+			for (int i=0; i<keys.length; i++) action.accept(keys[i], vals[i]);
+		}
+	}
+
+	public static class Sorted {
+		public static int[] with(int[] vals, int val) {
+			var pos = binarySearch(vals, val);
+			return pos>=0 ? vals : insert(vals, -(pos+1), val);
+		}
+
+		public static int[] without(int[] vals, int val) {
+			var pos = binarySearch(vals, val);
+			return pos<0 ? vals : spliced(vals, pos, 1);
+		}
+
+		public static boolean contains(int[] vals, int val) {
+			return binarySearch(vals, val)>=0;
+		}
+	}
+
+	public static int[] sorted(int[] in) {
+		var out = copyOf(in, in.length);
+		sort(out);
+		return out;
 	}
 }

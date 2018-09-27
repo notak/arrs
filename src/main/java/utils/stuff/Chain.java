@@ -1,9 +1,8 @@
 package utils.stuff;
 
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -22,8 +21,16 @@ public class Chain<T> {
 		this.wraps = wraps;
 	}
 	
+	public static <N> Chain<N> chain(N wraps) {
+		return new Chain<N>(wraps);
+	}
+	
 	public static <N> Chain<N> get(N wraps) {
 		return new Chain<N>(wraps);
+	}
+	
+	private Chain<T> getd(T newWrap) {
+		return newWrap == wraps ? this : Chain.get(newWrap);
 	}
 	
 	/** Get the value which has been wrapped in the Chain container */
@@ -44,110 +51,78 @@ public class Chain<T> {
 		return get(map.apply(wraps));
 	}
 	
+	/** If the optional is non-empty, apply it to the wrapped value using
+	 * the provided function, and return that wrapped, otherwise return this */
+	public <S> Chain<T> 
+	flatMap(Optional<S> opt, BiFunction<T, S, T> map) {
+		return opt.map(s->map.apply(wraps, s)).map(Chain::get).orElse(this);
+	}
+	
+	public Chain<T>
+	replaceIfNull(Supplier<T> otherwise) {
+		Console.printf("in replaceIfNull %s %s %s", wraps, wraps==null, otherwise.get());
+		return wraps==null ? getd(otherwise.get()) : this;
+	}
+	
 	public <R> Chain<T> 
-	ifSet(R v, BiConsumer<T, R> consumer) {
+	ifSet(R v, BiFunction<T, R, T> consumer) {
 		return ifTest(Support::notNull, consumer, v);
 	}
 	
-	public <R> Chain<T> 
-	ifSetS(Supplier<R> v, BiConsumer<T, R> consumer) {
-		return ifSet(v.get(), consumer);
-	}
-	
 	public Chain<T> 
-	ifNotEmpty(BiConsumer<T, String> consumer, String value) {
+	ifNotEmpty(BiFunction<T, String, T> consumer, String value) {
 		return ifTest(v->v!=null && !v.isEmpty(), consumer, value);
 	}
 	
 	public Chain<T> 
-	ifTrue(boolean val, BiConsumer<T, Boolean> consumer) {
+	ifTrue(boolean val, BiFunction<T, Boolean, T> consumer) {
 		return ifTest(v->v, consumer, val);
 	}
 	
 	public Chain<T> 
-	ifTrue(Supplier<Boolean> val, BiConsumer<T, Boolean> consumer) {
-		return ifTrue(val.get(), consumer);
-	}
-	
-	public Chain<T> 
-	ifGTE0(int val, BiConsumer<T, Integer> consumer) {
+	ifGTE0(int val, BiFunction<T, Integer, T> consumer) {
 		return ifTest(v->v>=0, consumer, val);
 	}
 	
 	public Chain<T> 
-	ifGTE0(Supplier<Integer> val, BiConsumer<T, Integer> consumer) {
-		return ifGTE0(val.get(), consumer);
-	}
-	
-	public Chain<T> 
-	ifGT0(int val, BiConsumer<T, Integer> consumer) {
+	ifGT0(int val, BiFunction<T, Integer, T> consumer) {
 		return ifTest(v->v>0, consumer, val);
 	}
 	
 	public Chain<T> 
-	ifGT0(Supplier<Integer> val, BiConsumer<T, Integer> consumer) {
-		return ifGT0(val.get(), consumer);
-	}
-	
-	public Chain<T> 
-	ifN0(int val, BiConsumer<T, Integer> consumer) {
+	ifN0(int val, BiFunction<T, Integer, T> consumer) {
 		return ifTest(v->v!=0, consumer, val);
 	}
 	
 	public Chain<T> 
-	ifN0(Supplier<Integer> val, BiConsumer<T, Integer> consumer) {
-		return ifN0(val.get(), consumer);
-	}
-	
-	public Chain<T> 
-	if0(int val, BiConsumer<T, Integer> consumer) {
+	if0(int val, BiFunction<T, Integer, T> consumer) {
 		return ifTest(v->v==0, consumer, val);
 	}
 	
-	public Chain<T> 
-	if0(Supplier<Integer> val, BiConsumer<T, Integer> consumer) {
-		return if0(val.get(), consumer);
-	}
-	
 	public <N, M> Chain<T> 
-	ifTest(Function<N, Boolean> test, BiConsumer<T, N> consumer, N val) {
-		if (test.apply(val)) consumer.accept(wraps, val);
-		return this;
+	ifTest(Function<N, Boolean> test, BiFunction<T, N, T> fn, N val) {
+		return test.apply(val) ? getd(fn.apply(wraps, val)) : this;
 	}
 	
 	public <N, M> Chain<T>
-	ifTest(Supplier<Boolean> test, BiConsumer<T, N> consumer, N value) {
-		if (test.get()) consumer.accept(wraps, value);
-		return this;
+	ifTest(Supplier<Boolean> test, BiFunction<T, N, T> fn, N value) {
+		return test.get() ? getd(fn.apply(wraps, value)) : this;
 	}
 
-	public <N, M> Chain<T> 
-	ifTest(BooleanSupplier test, Consumer<T> consumer) {
-		if (test.getAsBoolean()) consumer.accept(wraps);
-		return this;
-	}
-	
 	public Chain<T> 
-	ifGTMin(int val, BiConsumer<T, Integer> consumer) {
+	ifGTMin(int val, BiFunction<T, Integer, T> consumer) {
 		return ifTest(v->v>Integer.MIN_VALUE, consumer, val);
 	}
 
 	public Chain<T> 
-	ifGTMin(Supplier<Integer> v, BiConsumer<T, Integer> consumer) {
+	ifGTMin(Supplier<Integer> v, BiFunction<T, Integer, T> consumer) {
 		return ifGTMin(v.get(), consumer);
 	}
 
 	public <U, V> Chain<T> 
-	ifMaps(U value, Map<U, V> map, BiConsumer<T, V> consumer) {
-		if (map.containsKey(value)) consumer.accept(wraps, map.get(value));
-		return this;
-	}
-	
-	public <U, V> Chain<T> 
-	ifMapsS(Supplier<U> supplier, Map<U, V> map, BiConsumer<T, V> consumer) {
-		U value = supplier.get();
-		if (map.containsKey(value)) consumer.accept(wraps, map.get(value));
-		return this;
+	ifMaps(U value, Map<U, V> map, BiFunction<T, V, T> fn) {
+		return value!=null && map.containsKey(value) ? 
+			getd(fn.apply(wraps, map.get(value))) : this;
 	}
 	
 	public T complete() {

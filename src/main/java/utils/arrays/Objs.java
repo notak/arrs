@@ -3,11 +3,19 @@ package utils.arrays;
 import static java.lang.Math.min;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Map;
+
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.reducing;
 
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -15,8 +23,11 @@ import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
+import java.util.stream.Collector;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import utils.stuff.Fns;
 
 public class Objs {
 	
@@ -27,12 +38,12 @@ public class Objs {
 		return Arrays.deepEquals(a, b);
 	}
 
-	public static <U> Stream<U> stream(U[] us) {
-		return /*us==null ? Stream.empty() :*/ Arrays.stream(us);
-	}
-	
 	public static <U> void forEach(U[] us, Consumer<U> fn) {
 		stream(us).forEach(fn);
+	}
+	
+	public static <U> void forEachPos(U[] us, BiConsumer<U, Integer> fn) {
+		for(int i=0; i<us.length; i++) fn.accept(us[i], i);
 	}
 	
 	/** Optionally get the nth element, returns empty for array len<n+1 */
@@ -40,13 +51,26 @@ public class Objs {
 		return okPos(in, n) ? Optional.of(in[n]) : Optional.empty();
 	}
 
+	/** Optionally get the nth element, returns empty for array len<n+1 */
+	public static <T> T nth(T[] in, int n, T def) { 
+		return okPos(in, n) ? in[n] : def;
+	}
+
 	/** Optionally get the nth element from the end (empty if array len<n+1) */
 	public static <T> Optional<T> nthLast(T[] in, int n) {
 		return nth(in, in.length-(1+n));
 	}
+
+	/** Optionally get the nth element from the end (empty if array len<n+1) */
+	public static <T> T nthLast(T[] in, int n, T def) {
+		return nth(in, in.length-(1+n), def);
+	}
 	
 	/** Optionally get the first element, returning empty for an empty array */
 	public static <T> Optional<T> first(T[] in) { return nth(in, 0); }
+	
+	/** Optionally get the first element, returning empty for an empty array */
+	public static <T> T first(T[] in, T def) { return nth(in, 0, def); }
 	
 	/** Optionally get the first element, returning empty for an empty array */
 	public static <T> Optional<T> first(T[] in, Predicate<T> matcher) {
@@ -55,6 +79,9 @@ public class Objs {
 	
 	/** Optionally get the last element, returns empty for empty array */
 	public static <T> Optional<T> last(T[] in) { return nthLast(in, 0); }
+	
+	/** Optionally get the last element, returns empty for empty array */
+	public static <T> T last(T[] in, T def) { return nthLast(in, 0, def); }
 	
 	/** Maps an array of objects to an array of another object */ 
 	public static <T, U> U[] 
@@ -72,6 +99,18 @@ public class Objs {
 	/** Maps an array of objects to an array of longs */ 
 	public static <U> long[] mapLong(U[] in, ToLongFunction<U> mapper) {
 		return stream(in).mapToLong(mapper).toArray();
+	}
+	/** Maps an array of objects to an array of shorts */ 
+	public static <U> short[] mapShort(U[] in, Fns. ToShortFn<U> mapper) {
+		var out = new short[in.length];
+		for (int i=0; i<in.length; i++) out[i] = mapper.appy(in[i]);
+		return out;
+	}
+	/** Maps an array of objects to an array of bytes */ 
+	public static <U> byte[] mapByte(U[] in, Fns. ToByteFn<U> mapper) {
+		var out = new byte[in.length];
+		for (int i=0; i<in.length; i++) out[i] = mapper.appy(in[i]);
+		return out;
 	}
 	
 	public static <T> T[] subArray(T[] in, int start) {
@@ -109,6 +148,13 @@ public class Objs {
 	public static <U> U[] spliced(U[] in, int pos, int len, U rep) {
 		//if (in==null) return null;
 		return spliced(in, pos, len, toArray(rep));
+	}
+	
+	public static <U> U[] insert(U[] in, int pos, U item) {
+		U[] out = copyOfRange(in, 0, in.length+1);
+		for (int i=pos; i<in.length; i++) out[i+1] = in[i];
+		out[pos] = item;
+		return out;
 	}
 	
 	public static <U> Stream<String> streamAsString(U[] in) {
@@ -349,4 +395,40 @@ public class Objs {
 		return arr.length<2 ? Optional.empty() :
 			Optional.of(map.apply(arr[0], arr[1], subArray(arr, 2)));
 	}
+	
+	public static <T> T[] sorted(T[] in, Comparator<T> comp) {
+		var out=Arrays.copyOf(in, in.length);
+		Arrays.sort(out, comp);
+		return out;
+	}
+
+	public static <T extends Comparable<T>> T[] sorted(T[] in) {
+		return sorted(in, T::compareTo);
+	}
+
+	/** This can be used to create a single-element array of arrays, where the 
+	 * normal version will wrongly destructure the passed array */
+	public static <T> T[] toArray(T t, IntFunction<T[]>cons) {
+		T[] out = cons.apply(1);
+		out[0] = t;
+		return out;
+	}
+
+	/** This collector will reduce a stream to an array
+	 * 	Effectively this is the same as calling toArray, although possibly 
+	 *  slower. It can be used within a more complex Collector though,
+	 *  which is handy */
+	public static <T> Collector<T, ?, T[]> 
+	reducingToArray(IntFunction<T[]> cons) {
+		return reducing(cons.apply(0), i->toArray(i, cons), Objs::append);
+	}
+	
+	/** Given a stream of arrays, this function will group them by the first
+	 * element into a map of arrays of arrays */
+	public static <T> Collector<T[], ?, Map<T, T[][]>>
+	groupArraysByFirstElement(IntFunction<T[][]> cons) {
+		return groupingBy(p->p[0], 
+			mapping(p->subArray(p, 1), reducingToArray(cons)));
+	}
+	
 }

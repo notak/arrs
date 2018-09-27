@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import utils.arrays.Ints;
-import utils.arrays.Objs;
 
 public class Lists {
 	public static <I> List<I> filtered(List<I> in, Predicate<I> mapper) {
@@ -93,7 +92,7 @@ public class Lists {
 	
 	@SafeVarargs
 	public static <T> Optional<T> firstOf(Supplier<Optional<T>>... in) {
-		return Objs.stream(in)
+		return Arrays.stream(in)
 			.map(s->s.get())
 			.filter(s->s.isPresent())
 			.findFirst().orElseGet(Optional::empty);

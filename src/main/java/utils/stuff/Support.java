@@ -60,6 +60,10 @@ public class Support {
 
 	public static <T> boolean notNull(T in) { return in!=null; }
 
+	public static <T> T ifNull(T in, Supplier<T> otherwise) { 
+		return in!=null ? in : otherwise.get(); 
+	}
+
 	public static boolean booleanOrFalse(String in) {
 		return "true".equals(in);
 	}
