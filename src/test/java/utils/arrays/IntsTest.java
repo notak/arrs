@@ -3,8 +3,6 @@ package utils.arrays;
 import static org.junit.Assert.*;
 import static utils.arrays.Ints.*;
 
-import java.util.Arrays;
-
 import org.junit.Test;
 
 import utils.arrays.Ints;
@@ -58,9 +56,9 @@ public class IntsTest {
 	@Test
 	public void testMap() {
 		assertArrayEquals(iPlusOne, map(i, j->j+1));
-		assertArrayEquals(
-			Arrays.stream(iPlusOne).mapToLong(i->i).toArray(), 
-			mapLong(i, j->j+1));
+//		assertArrayEquals(
+//			Arrays.stream(iPlusOne).mapToLong(i->i).toArray(), 
+//			mapLong(i, j->j+1));
 		assertArrayEquals(s, mapStr(i));
 	}
 
