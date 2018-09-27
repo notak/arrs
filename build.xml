@@ -1,12 +1,46 @@
 <project>
 <!--
 Compare files for equivalence
-SHOULD RETURN NOTHING:
-sed s/byte/short/g src/main/java/arrays/Bytes.java | sed s/Byte/Short/g| diff -u src/main/java/arrays/Shorts.java -
-SHOULD RETURN SOME STREAM STUFF
-sed s/byte/long/g src/main/java/arrays/Bytes.java |sed "s/Optional<Byte>/OptionalLong/g"| sed s/Optional[.]/OptionalLong./g  |sed "s/Stream<Byte>/LongStream/g"|sed s/Byte/Long/g| diff -u src/main/java/arrays/Longs.java -
+SHOULD RETURN NOTHING, so safe to replace the diff with > and gen the code:
+
+sed s/byte/short/g src/main/java/utils/arrays/Bytes.java \
+| sed s/Byte/Short/g \
+| diff -u src/main/java/utils/arrays/Shorts.java -
+
+sed s/byte/short/g src/main/java/utils/arrays/Bytes.java \
+| sed s/Byte/Short/g \
+> src/main/java/utils/arrays/Shorts.java
+
+SHOULD RETURN SOME STREAM STUFF, so can gen the code, but must delete those
+two functions afterwards
+
+sed s/byte/long/g src/main/java/utils/arrays/Bytes.java \
+| sed "s/Optional<Byte>/OptionalLong/g" \
+| sed -r "s|Optional/[*]Byte[*]/|OptionalLong|g" \
+| sed "s/Stream<Byte>/LongStream/g"|sed s/Byte/Long/g \
+| sed "s/Optional<Byte>/OptionalLong/g" \
+| sed -r "s|/[*]BIGONLY||" \
+| sed -r "s|/BIGONLY[*]/||" \
+| diff -u src/main/java/utils/arrays/Longs.java -
+
+sed s/byte/long/g src/main/java/utils/arrays/Bytes.java \
+| sed "s/Optional<Byte>/OptionalLong/g" \
+| sed -r "s|Optional/[*]Byte[*]/|OptionalLong|g" \
+| sed "s/Stream<Byte>/LongStream/g"|sed s/Byte/Long/g \
+| sed "s/Optional<Byte>/OptionalLong/g" \
+| sed -r "s|/[*]BIGONLY||" \
+| sed -r "s|/BIGONLY[*]/||" \
+> src/main/java/utils/arrays/Longs.java
+
 SHOULD RETURN mapToLong vs mapToInt
-sed s/long/int/g src/main/java/arrays/Longs.java |sed "s/OptionalLong/OptionalInt/g"  |sed s/ToLong/ToInt/g |sed s/Longs/Ints/g |sed s/Long/Integer/g| diff -u src/main/java/arrays/Ints.java -
+
+sed s/long/int/g src/main/java/utils/arrays/Longs.java \
+| sed "s/OptionalLong/OptionalInt/g" \
+| sed s/ToLong/ToInt/g \
+| sed s/LongStream/IntStream/g \
+| sed s/Longs/Ints/g \
+| sed s/Long/Integer/g \
+| diff -u src/main/java/utils/arrays/Ints.java -
 -->
     <target name="clean">
         <delete dir="target"/>
@@ -22,7 +56,6 @@ sed s/long/int/g src/main/java/arrays/Longs.java |sed "s/OptionalLong/OptionalIn
             includeantruntime="false"
             srcdir="src/main/java" 
             destdir="target/classes"
-            classpath="deps/deps.jar"
         />
     </target>
 
