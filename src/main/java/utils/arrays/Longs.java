@@ -74,6 +74,11 @@ public class Longs {
 		long apply(long val, long val2);
 	}
 	
+	@FunctionalInterface
+	public static interface BiSFn<S> {
+		S apply(long val, S val2);
+	}
+	
 	public static final long[] EMPTY = {};
 
 	@SafeVarargs
@@ -423,6 +428,14 @@ public class Longs {
 			keys = insert(keys, pos, key);
 			vals = Objs.insert(vals, pos, val);
 			return val;
+		}
+		
+		public T compute(long key, BiSFn<T> updater) {
+			var old = get(key);
+			 T newValue = updater.apply(key, old);
+			 if (newValue != null) put(key, newValue);
+			 else if (old != null) remove(key);
+			 return newValue;
 		}
 		
 		public void clear() {

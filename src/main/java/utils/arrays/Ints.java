@@ -358,6 +358,15 @@ public class Ints {
 			Optional.of(map.apply(arr[0], arr[1]));
 	}
 
+	/** Apply a mapping function which expects the first two items of the array  
+	 * with the tail dumped.
+	 * @return an optional containing the result of the mapping, or empty if 
+	 * 		the array contains less than two elements */
+	public static <T> Optional<T> tailTailMap(int[] arr, BiFn<T> map) {
+		return arr.length<2 ? Optional.empty() :
+			Optional.of(map.apply(arr[arr.length-1], arr[arr.length-2]));
+	}
+
 	/** Apply a mapping function which expects the array to be broken into
 	 * two leading ints and an array of the remaining ints
 	 * @return an optional containing the result of the mapping, or empty if 
