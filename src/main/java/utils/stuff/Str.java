@@ -5,6 +5,11 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class Str {
+	@FunctionalInterface
+	public static interface Consumer {
+		public void accept(String in);
+	}
+	
 	public static Function<String, String> quoted = Str::quoted;
 
 	public static String quoted(String in) {
