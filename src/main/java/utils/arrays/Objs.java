@@ -4,11 +4,13 @@ import static java.lang.Math.min;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Map;
 
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.sort;
 import static java.util.Arrays.stream;
+import java.util.Map;
+
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.mapping;
@@ -396,9 +398,13 @@ public class Objs {
 			Optional.of(map.apply(arr[0], arr[1], subArray(arr, 2)));
 	}
 	
-	public static <T> T[] sorted(T[] in, Comparator<T> comp) {
-		var out=Arrays.copyOf(in, in.length);
-		Arrays.sort(out, comp);
+	public static <T extends Comparable<T>> T[] sorted(T[] in) {
+		return sorted(in, Comparable::compareTo);
+	}
+	
+	public static <T> T[] sorted(T[] in, Comparator<T> sortBy) {
+		var out = Arrays.copyOf(in, in.length);
+		sort(out, sortBy);
 		return out;
 	}
 

@@ -1,6 +1,10 @@
 package utils.stuff;
 
 import static java.nio.file.StandardWatchEventKinds.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static utils.arrays.Objs.empty;
+import static utils.arrays.Objs.forEach;
+import static utils.stuff.Support.trySleep;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -10,13 +14,14 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Arrays;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /** Wrap watchers to allow them to use lambdas effectively. 
  * This is grim, but considering that Watchers are from 1.7 they are rubbish */
-public class Watcher extends Thread {
+public class Watcher {
 	public final Path dir;
 	final Consumer<Path> action;
 	final Predicate<Path> matches;
@@ -41,27 +46,34 @@ public class Watcher extends Thread {
 			.filter(matches);
 	}
 
-	@SuppressWarnings("unchecked")
-	public void run() {
+	public void run(ScheduledExecutorService runSes) {
 		try {
 			WatchService watcher = FileSystems.getDefault().newWatchService();
 			WatchKey key = dir.register(watcher, ENTRY_CREATE, ENTRY_MODIFY);
 
-			while (!Thread.interrupted()) try {
-				WatchKey poll = watcher.take();
-				Thread.sleep(1000); //give the file a chance to finish saving
-				
-				poll.pollEvents().stream()
-				.filter(e->e.kind()!=OVERFLOW)
-				.map(e->((WatchEvent<Path>)e).context())
-				.filter(matches)
-				.forEach(action);
-				
-				/* Must reset the key to receive further watch events.
-				 * This won't play nice if the directory is deleted, so, um,
-				 * don't, I guess */
-				key.reset();
-			} catch (InterruptedException e) {}
-		} catch (IOException e) { throw new Error(e); } //TODO
+			runSes.scheduleWithFixedDelay(
+				()->this.check(key), 500, 500, MILLISECONDS);
+		} catch (IOException ioe) {
+			throw new Error(ioe);
+		}
+	}
+	
+	private void check(WatchKey key) {
+		
+		@SuppressWarnings("unchecked")
+		var evts = key.pollEvents().stream()
+			.filter(e->e.kind()!=OVERFLOW)
+			.map(e->((WatchEvent<Path>)e).context())
+			.filter(matches)
+			.toArray(Path[]::new);
+		
+		//Don't think this is required if you call WatchKey.pollEvents
+		//key.reset();
+		
+		//give the file a chance to finish saving. Not a great solution since 
+		//nothing updates in this time
+		if (!empty(evts)) trySleep(500);
+			 
+		forEach(evts, action);
 	}
 }
