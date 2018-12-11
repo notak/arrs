@@ -3,8 +3,11 @@ package utils.arrays;
 import static java.lang.Math.min;
 
 import java.util.Arrays;
+import java.util.Comparator;
+
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.sort;
 import static java.util.stream.Collectors.joining;
 
 import java.util.Optional;
@@ -348,5 +351,15 @@ public class Objs {
 	headHeadTailMap(U[] arr, HeadHeadTailFn<T, U> map) {
 		return arr.length<2 ? Optional.empty() :
 			Optional.of(map.apply(arr[0], arr[1], subArray(arr, 2)));
+	}
+	
+	public static <T extends Comparable<T>> T[] sorted(T[] in) {
+		return sorted(in, Comparable::compareTo);
+	}
+	
+	public static <T> T[] sorted(T[] in, Comparator<T> sortBy) {
+		var out = Arrays.copyOf(in, in.length);
+		sort(out, sortBy);
+		return out;
 	}
 }

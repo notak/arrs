@@ -16,10 +16,6 @@ import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import utils.arrays.Bytes.BiFn;
-import utils.arrays.Bytes.HeadHeadTailFn;
-import utils.arrays.Bytes.HeadTailFn;
-
 public class Ints {
 	@FunctionalInterface
 	public static interface Consumer {
