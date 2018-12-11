@@ -1,17 +1,26 @@
 package utils.arrays;
 
 import static java.lang.Math.min;
+import static java.lang.System.arraycopy;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Optional;
-
+	
+import static java.util.Arrays.asList;
+import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.sort;
+/*BIGONLYimport static java.util.Arrays.stream;/BIGONLY*/
 import static java.util.stream.Collectors.joining;
 
+/*BIGONLYimport java.util.OptionalLong;/BIGONLY*/
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
+/*BIGONLYimport java.util.stream.LongStream;/BIGONLY*/
 import java.util.stream.Stream;
 
 public class Bytes {
@@ -90,7 +99,13 @@ public class Bytes {
 	
 	/** Optionally get the nth element, returns empty for array len<n+1 */
 	public static Optional<Byte> nth(byte[] in, int n) { 
-		return okPos(in, n) ? Optional.of(in[n]) : Optional.empty();
+		return okPos(in, n) 
+			? Optional/*Byte*/.of(in[n]) : Optional/*Byte*/.empty();
+	}
+
+	/** get the nth element, returns def for array len<n+1 */
+	public static byte nth(byte[] in, int n, byte def) { 
+		return okPos(in, n) ? in[n] : def;
 	}
 
 	/** Optionally get the nth element from the end (empty if array len<n+1) */
@@ -98,11 +113,26 @@ public class Bytes {
 		return nth(in, in.length-(n+1));
 	}
 	
+	/** Optionally get the nth element from the end (empty if array len<n+1) */
+	public static byte nthLast(byte[] in, int n, byte def) {
+		return nth(in, in.length-(n+1), def);
+	}
+	
 	/** Optionally get the first element, returning empty for an empty array */
 	public static Optional<Byte> first(byte[] in) { return nth(in, 0); }
 	
+	/** Get the first element, or returning the provided default */
+	public static byte first(byte[] in, byte def) { 
+		return nth(in, 0, def); 
+	}
+	
 	/** Optionally get the last element, returns empty for empty array */
 	public static Optional<Byte> last(byte[] in) { return nthLast(in, 0); }
+
+	/** Get the last element, or returning the provided default */
+	public static byte last(byte[] in, byte def) { 
+		return nthLast(in, 0, def); 
+	}
 
 	/** Maps an array of bytes to an array of T */ 
 	public static <T> T[] 
@@ -150,7 +180,14 @@ public class Bytes {
 		else if (pos+len>=in.length) return copyOfRange(in, 0, pos);
 		
 		byte[] out = copyOfRange(in, 0, in.length-len);
-		for (int i=pos; i<out.length; i++) out[i] = in[i+len];
+		arraycopy(in, pos+len, out, pos, out.length-pos);
+		return out;
+	}
+	
+	public static byte[] insert(byte[] in, int pos, byte item) {
+		byte[] out = copyOfRange(in, 0, in.length+1);
+		arraycopy(in, pos, out, pos+1, in.length-pos);
+		out[pos] = item;
 		return out;
 	}
 	
@@ -234,7 +271,15 @@ public class Bytes {
 		return foldl(in, (byte)0, (i, s)->(byte)(i+s));
 	}
 
-	/**Pair up elements in the array and map the pairs to a new value */
+	/*BIGONLY
+	public static byte max(byte[] in) {
+		return foldl(in, (byte)0, Math::max);
+	}
+	/BIGONLY*/
+
+	/**Pair up elements in the array and map the pairs to a new value.
+	 * If there are an odd number of elements, the last one will be ignored
+	 * */
 	public static <T, U> byte[] pair(byte[] in, ToByteBiFn pair) {
 		if (in.length==0) return in;
 		byte[] out = new byte[in.length/2];
@@ -269,7 +314,7 @@ public class Bytes {
 	public static byte[] append(byte[] a, byte[] b) {
 		if (a.length==0) return b; else if (b.length==0) return a;
 		byte[] out = Arrays.copyOf(a, a.length + b.length);
-		for (int i=0; i<b.length; i++) out[a.length+i] = b[i];
+		arraycopy(b, 0, out, a.length, b.length);
 		return out;
 	}
 	
@@ -292,9 +337,8 @@ public class Bytes {
 	 * discarded */
 	public static <T> Stream<byte[]> streamGroups(int size, byte[] from) {
 		return from==null ? Stream.empty() 
-			//JAVA9:			iterate(0, i->i<from.length, i->i+=size)
-			: IntStream.range(0, from.length/size).map(i->i*size)
-				.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
+			: IntStream.iterate(0, i->i<from.length, i->i+=size)
+				.mapToObj(i->copyOfRange(from, i, i+size));
 	}
 	
 	@FunctionalInterface
@@ -333,5 +377,128 @@ public class Bytes {
 	headHeadTailMap(byte[] arr, HeadHeadTailFn<T> map) {
 		return arr.length<2 ? Optional.empty() :
 			Optional.of(map.apply(arr[0], arr[1], subArray(arr, 2)));
+	}
+
+	public static class ObjMap<T> {
+		private byte[] keys = EMPTY;
+		private T[] vals;
+		public final IntFunction<T[]> cons;
+		
+		public ObjMap(IntFunction<T[]> cons) {
+			this.cons = cons;
+			vals = cons.apply(0);
+		}
+
+		public T put(byte key, T val) {
+			var pos = binarySearch(keys, key);
+			if (pos>=0) {
+				var out = vals[pos];
+				vals[pos] = val;
+				return out;
+			} else {
+				pos = -(pos+1);
+				keys = insert(keys, pos, key);
+				vals = Objs.insert(vals, pos, val);
+				return null;
+			}
+		}
+		
+		public T remove(byte key) {
+			var pos = binarySearch(keys, key);
+			if (pos<0) return null;
+			var out = vals[pos];
+			keys = spliced(keys, pos, 1);
+			vals = Objs.spliced(vals, pos, 1);
+			return out;
+		}
+		
+		public T get(byte key) {
+			return getOrDefault(key, null);
+		}
+		
+		public T getOrDefault(byte key, T def) {
+			var pos = binarySearch(keys, key);
+			return pos>=0 ? vals[pos] : def;
+		}
+		
+		public boolean containsKey(byte key) {
+			return binarySearch(keys, key)>=0;
+		}
+		
+		public T computeIfAbsent(byte key, Fn<T> gen) {
+			var pos = binarySearch(keys, key);
+			if (pos>=0) return vals[pos];
+			var val = gen.apply(key);
+			pos = -(pos+1);
+			keys = insert(keys, pos, key);
+			vals = Objs.insert(vals, pos, val);
+			return val;
+		}
+		
+		public void clear() {
+			keys = EMPTY;
+			vals = cons.apply(0);
+		}
+		
+		public byte[] keys() {
+			return keys.clone();
+		}
+		/*BIGONLY
+		public LongStream streamKeys() {
+			return stream(keys);
+		}
+		/BIGONLY*/
+		public T[] vals() {
+			return vals.clone();
+		}
+
+		public Stream<T> streamVals() {
+			return Arrays.stream(vals);
+		}
+
+		public static class Entry<T> {
+			public final long key;
+			public final T val;
+
+			public Entry(long key, T val) {
+				this.key = key;
+				this.val = val;
+			}
+		}
+		
+		public Stream<Entry<T>> streamEntries() {
+			return IntStream.range(0, keys.length)
+				.mapToObj(i->new Entry<>(keys[i], vals[i]));
+		}
+
+		public Iterator<T> iterVals() {
+			return asList(vals).iterator();
+		}
+		
+		public void forEach(BiConsumer<Byte, T> action) {
+			for (int i=0; i<keys.length; i++) action.accept(keys[i], vals[i]);
+		}
+	}
+
+	public static class Sorted {
+		public static byte[] with(byte[] vals, byte val) {
+			var pos = binarySearch(vals, val);
+			return pos>=0 ? vals : insert(vals, -(pos+1), val);
+		}
+
+		public static byte[] without(byte[] vals, byte val) {
+			var pos = binarySearch(vals, val);
+			return pos<0 ? vals : spliced(vals, pos, 1);
+		}
+
+		public static boolean contains(byte[] vals, byte val) {
+			return binarySearch(vals, val)>=0;
+		}
+	}
+
+	public static byte[] sorted(byte[] in) {
+		var out = copyOf(in, in.length);
+		sort(out);
+		return out;
 	}
 }

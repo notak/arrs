@@ -3,6 +3,16 @@ package utils.stuff;
 public class Fns {
 
 	@FunctionalInterface
+	public static interface ToShortFn<A> {
+		public short appy(A a);
+	}
+
+	@FunctionalInterface
+	public static interface ToByteFn<A> {
+		public byte appy(A a);
+	}
+
+	@FunctionalInterface
 	public static interface SideEffect {
 		public void send();
 	}

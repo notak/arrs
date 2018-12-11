@@ -43,11 +43,6 @@ public class ObjsTest {
 	}
 	
 	@Test
-	public void testStream() {
-		assertArrayEquals(i, stream(i).toArray());
-	}
-	
-	@Test
 	public void testForEach() {
 		String[] sum = { "" };
 		forEach(i, j->sum[0]+=j+" ");

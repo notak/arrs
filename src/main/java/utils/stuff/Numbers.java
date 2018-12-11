@@ -3,6 +3,7 @@ package utils.stuff;
 import static utils.arrays.Objs.mapInt;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.ToIntFunction;
 
 public class Numbers {
@@ -22,6 +23,18 @@ public class Numbers {
 			return Optional.of(Double.parseDouble(in));
 		} catch (Exception e) {
 			return Optional.empty();
+		}
+	}
+	
+	public static OptionalInt optInt(String in) {
+		return optInt(in, 10);
+	}
+
+	public static OptionalInt optInt(String in, int base) {
+		try {
+			return OptionalInt.of(Integer.parseInt(in, base));
+		} catch (Exception e) {
+			return OptionalInt.empty();
 		}
 	}
 	
