@@ -394,9 +394,7 @@ public class Ints {
 				vals[pos] = val;
 				return out;
 			} else {
-				pos = -(pos+1);
-				keys = insert(keys, pos, key);
-				vals = Objs.insert(vals, pos, val);
+				insertAt(pos, key, val);
 				return null;
 			}
 		}
@@ -426,11 +424,20 @@ public class Ints {
 		public T computeIfAbsent(int key, Fn<T> gen) {
 			var pos = binarySearch(keys, key);
 			if (pos>=0) return vals[pos];
-			var val = gen.apply(key);
+			else return insertAt(pos, key, gen.apply(key));
+		}
+		
+		private T insertAt(int pos, int key, T val) {
 			pos = -(pos+1);
 			keys = insert(keys, pos, key);
 			vals = Objs.insert(vals, pos, val);
 			return val;
+		}
+		
+		public T compute(int key, BiFunction<Integer, T, T> gen) {
+			var pos = binarySearch(keys, key);
+			if (pos>=0) return vals[pos] = gen.apply(key, vals[pos]);
+			else return insertAt(pos, key, gen.apply(key, null));
 		}
 		
 		public void clear() {
