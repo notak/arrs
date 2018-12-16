@@ -77,6 +77,9 @@ public interface Emitter<T> {
 	
 	
 	public class Subs<T> {
+		@SuppressWarnings("rawtypes")
+		public static final Subs[] NONE = new Subs[0];
+		
 		private final Emitter<T> emitter;
 		
 		public Subs(Emitter<T> emitter) {
