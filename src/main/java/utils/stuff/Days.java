@@ -1,5 +1,6 @@
 package utils.stuff;
 
+import static java.lang.System.currentTimeMillis;
 import static java.lang.ThreadLocal.withInitial;
 
 import java.text.SimpleDateFormat;
@@ -23,7 +24,7 @@ public class Days {
 	/** Convenience function for creating a Calendar object in the UTC timezone
 	 * and initializing it to the unix timestamp provided */
 	private static Calendar utcCalendar(long time) {
-		Calendar out = utcCalendar();
+		var out = utcCalendar();
 		out.setTime(new Date(time));
 		return out;
 	}
@@ -47,23 +48,28 @@ public class Days {
 
 	/** The current day since the unix apocalypse (ie. where 1970-01-01 is 0) */
 	public static int today() {
-		return (int)(System.currentTimeMillis()/(86400*1000));
+		return hourNow()/24;
 	}
 	
 	/** The current number of half-minutes since the unix apocalypse.
 	 * <p>This is great if you have data which extensively uses half-minutes. Less
 	 * so otherwise */
 	public static int timeOfDayHM() {
-		return (int)((System.currentTimeMillis()/30000)%(24*120));
+		return (int)(secsNow()/30)%(24*120);
 	}
 	
 	/** The current number of hours since the unix apocalypse. */
 	public static int hourNow() {
-		return ((int)(System.currentTimeMillis()/(3600*1000)));
+		return (int)(secsNow()/3600);
+	}
+
+	/** The current number of hours since the unix apocalypse. */
+	public static long secsNow() {
+		return currentTimeMillis()/1000;
 	}
 
 	private static SimpleDateFormat simpleDateFormat(String fmt, TimeZone tz) {
-		SimpleDateFormat out = new SimpleDateFormat(fmt);
+		var out = new SimpleDateFormat(fmt);
 		out.setTimeZone(tz);
 		return out;
 	}
