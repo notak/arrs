@@ -9,6 +9,8 @@ import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.sort;
 import static java.util.Arrays.stream;
+import static java.util.Optional.of;
+
 import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -100,7 +102,9 @@ public class Objs {
 	}
 	/** Maps an array of objects to an array of longs */ 
 	public static <U> long[] mapLong(U[] in, ToLongFunction<U> mapper) {
-		return stream(in).mapToLong(mapper).toArray();
+		var out = new long[in.length];
+		for (int i=0; i<in.length; i++) out[i] = mapper.applyAsLong(in[i]);
+		return out; //stream(in).mapToLong(mapper).toArray();
 	}
 	/** Maps an array of objects to an array of shorts */ 
 	public static <U> short[] mapShort(U[] in, Fns. ToShortFn<U> mapper) {
@@ -165,7 +169,9 @@ public class Objs {
 	
 	public static <T> String join(String glue, T[] a) { return join(a, glue); }
 	public static <T> String join(T[]in, String glue) {
-		return Arrays.stream(in).map(Object::toString).collect(joining(glue));
+		return stream(in)
+			.map(o->o==null ? "<NULL>" : o.toString())
+			.collect(joining(glue));
 	}
 
 	public static <U> int indexOf(U[] hay, U needle) {
@@ -183,6 +189,15 @@ public class Objs {
 	
 	public static <U> boolean contains(U[] hay, U needle) {
 		return indexOf(hay, needle) >= 0;
+	}
+	
+	public static <U> boolean intersects(U[] a, U[] b) {
+		return anyMatch(a, i->contains(b, i));
+	}
+	
+	public static <U> boolean anyMatch(U[] a, Predicate<U> test) {
+		for (int i=0; i<a.length; i++) if (test.test(a[i])) return true;
+		return false;
 	}
 	
 	public static <U> boolean okPos(U[] a, int i) { return i>=0 && i<a.length; }
