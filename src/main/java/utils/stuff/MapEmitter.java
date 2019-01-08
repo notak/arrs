@@ -1,5 +1,8 @@
 package utils.stuff;
 
+import static java.util.Collections.emptyMap;
+import static utils.arrays.Objs.toArray;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,6 +20,8 @@ implements Map<K, V> {
 	}
 
 	public static class MapUpdate<K, V> {
+		@SuppressWarnings("rawtypes")
+		public static MapUpdate[] NONE = new MapUpdate[0];
 		public final Map<K, V> map;
 		public final K[] removals;
 
@@ -29,7 +34,7 @@ implements Map<K, V> {
 			HashMap<K, V> out = new HashMap<>(map);
 			//removes on null, unlike addAll
 			add.map.forEach((k, v)->out.merge(k, v, (a, b)->b));
-			Objs.forEach(add.removals, out::remove);
+			if (add.removals!=null) Objs.forEach(add.removals, out::remove);
 			return new MapUpdate<>(out, null);
 		}
 	}
@@ -55,12 +60,16 @@ implements Map<K, V> {
 		send(map, false);
 	}
 
+	public void send(K key, V value) {
+		send(Map.of(key, value));
+	}
+
 	@Override
 	public V remove(Object k) {
 		if (!containsKey(k)) return null;
 		V old = get(k);
 		@SuppressWarnings("unchecked") K kk = (K)k;
-		send(new MapUpdate<>(Collections.emptyMap(), Objs.toArray(kk)));
+		send(new MapUpdate<>(emptyMap(), toArray(kk)));
 		return old;
 	}
 

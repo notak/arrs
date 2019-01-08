@@ -72,11 +72,9 @@ public class Support {
 		return "Y".equals(in);
 	}
 	
-	public static boolean trySleep(int period) {
-		try { Thread.sleep(period); return true; } 
-		catch (InterruptedException i) { 
-			return false; 
-		}
+	public static boolean trySleep(int millis) {
+		try { Thread.sleep(millis); return true; } 
+		catch (InterruptedException i) { return false; }
 	}
 
 	public static <R> CompletableFuture<R> future(R val) {
