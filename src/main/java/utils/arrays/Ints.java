@@ -19,6 +19,7 @@ import java.util.OptionalInt;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.IntFunction;
+import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -113,6 +114,11 @@ public class Ints {
 	/** Get the first element, or returning the provided default */
 	public static int first(int[] in, int def) { 
 		return nth(in, 0, def); 
+	}
+	
+	/** Optionally get the first element, returning empty for an empty array */
+	public static OptionalInt first(int[] in, IntPredicate matcher) {
+		return stream(in).filter(matcher::test).findFirst();
 	}
 	
 	/** Optionally get the last element, returns empty for empty array */
@@ -482,6 +488,12 @@ public class Ints {
 		
 		public void forEach(BiConsumer<Integer, T> action) {
 			for (int i=0; i<keys.length; i++) action.accept(keys[i], vals[i]);
+		}
+		
+		public String toString() {
+			var out = new StringBuilder();
+			forEach((k, v)->out.append(k + ": " + v + ", "));
+			return out.toString();
 		}
 	}
 

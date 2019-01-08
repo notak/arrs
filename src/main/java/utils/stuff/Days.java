@@ -51,7 +51,7 @@ public class Days {
 		return hourNow()/24;
 	}
 	
-	/** The current number of half-minutes since the unix apocalypse.
+	/** The current number of half-minutes since the start of the day.
 	 * <p>This is great if you have data which extensively uses half-minutes. Less
 	 * so otherwise */
 	public static int timeOfDayHM() {
