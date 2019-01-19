@@ -9,7 +9,6 @@ import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.sort;
 import static java.util.Arrays.stream;
-import static java.util.Optional.of;
 
 import java.util.Map;
 
@@ -90,7 +89,14 @@ public class Objs {
 	/** Maps an array of objects to an array of another object */ 
 	public static <T, U> U[] 
 	map(T[] in, Function<T, U> map, IntFunction<U[]> cons) {
-		return stream(in).map(map).toArray(cons);
+		var out = cons.apply(in.length);
+		for (int i=0; i<in.length; i++) out[i] = map.apply(in[i]);
+		return out;
+	}
+	/** Maps an array of objects to an array of another object */ 
+	public static <T, U> U[] 
+	flatMap(T[] in, Function<T, U[]> map, IntFunction<U[]> cons) {
+		return stream(in).map(map).flatMap(Arrays::stream).toArray(cons);
 	}
 	/** Maps an array of objects to an array of strings */ 
 	public static <T> String[] mapStr(T[] in, Function<T, String> mapper) {
