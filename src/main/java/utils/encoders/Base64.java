@@ -1,5 +1,7 @@
 package utils.encoders;
 
+import static utils.arrays.Bytes.EMPTY;
+
 import utils.arrays.Bytes;
 
 public class Base64 {
@@ -9,7 +11,11 @@ public class Base64 {
 	}
 	
 	public static byte[] decode(String data) {
-		try { return java.util.Base64.getDecoder().decode(data); }
-		catch (IllegalArgumentException e) { return Bytes.EMPTY; }
+		try { 
+			return data==null ? EMPTY 
+				: java.util.Base64.getDecoder().decode(data); 
+		} catch (IllegalArgumentException e) { 
+			return Bytes.EMPTY; 
+		}
 	}
 }
