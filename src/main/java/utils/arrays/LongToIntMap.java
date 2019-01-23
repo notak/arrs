@@ -13,6 +13,14 @@ public class LongToIntMap {
 	private long[] keys = Longs.EMPTY;
 	private int[] vals = Ints.EMPTY;
 	
+	public LongToIntMap() {}
+	
+	public LongToIntMap(long[] keys, int[] vals) {
+		this();
+		//TODO: this is quite wasteful
+		for (int i=0; i<keys.length; i++) put(keys[i], vals[i]);
+	}
+	
 	public int put(long key, int val) {
 		var pos = binarySearch(keys, key);
 		if (pos>=0) {

@@ -1,11 +1,14 @@
 package utils.stuff;
 
 import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -110,4 +113,14 @@ public class Support {
 			for(var c: cs) if (c!=null) c.close(); 
 		} catch (Exception e) { throw new Error(e); }
 	}
+
+	public static String hostname() throws IOException {
+        Process proc = Runtime.getRuntime().exec("hostname");
+        try (InputStream stream = proc.getInputStream()) {
+            try (Scanner s = new Scanner(stream)) {
+            	s.useDelimiter("\\A");
+                return s.hasNext() ? s.next() : "";
+            }
+        }
+    }
 }
