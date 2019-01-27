@@ -275,9 +275,17 @@ public class Longs {
 	/**Pair up elements in the array and map the pairs to a new value.
 	 * If there are an odd number of elements, the last one will be ignored
 	 * */
-	public static <T, U> long[] pair(long[] in, ToLongBiFn pair) {
+	public static long[] pair(long[] in, ToLongBiFn pair) {
 		if (in.length==0) return in;
 		long[] out = new long[in.length/2];
+		for (int i=1; i<in.length; i+=2) {
+			out[(i-1)/2] = pair.apply(in[i-1], in[i]);
+		}
+		return out;
+	}
+
+	public static <T> T[] pairObj(long[] in, BiFn<T> pair, IntFunction<T[]> gen) {
+		T[] out = gen.apply(in.length/2);
 		for (int i=1; i<in.length; i+=2) {
 			out[(i-1)/2] = pair.apply(in[i-1], in[i]);
 		}
