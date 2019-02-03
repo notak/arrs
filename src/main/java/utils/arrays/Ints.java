@@ -1,6 +1,5 @@
 package utils.arrays;
 
-import static java.lang.Math.min;
 import static java.lang.System.arraycopy;
 
 import java.util.Arrays;
@@ -162,7 +161,8 @@ public class Ints {
 		return subArray(in, start, in.length);
 	}
 	public static int[] subArray(int[] in, int start, int end) {
-		return copyOfRange(in, min(start, in.length), min(end, in.length));
+		return copyOfRange(in, 
+			Math.min(start, in.length), Math.min(end, in.length));
 	}
 
 	public static int[] subArrayLen(int[] in, int start, int len) {
@@ -269,6 +269,10 @@ public class Ints {
 	
 	public static int max(int[] in) {
 		return foldl(in, (int)0, Math::max);
+	}
+	
+	public static int min(int[] in) {
+		return foldl(in, (int)0, Math::min);
 	}
 	
 

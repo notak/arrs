@@ -117,6 +117,12 @@ public class Objs {
 	public static <U> long[] mapLong(U[] in, ToLongFunction<U> mapper) {
 		var out = new long[in.length];
 		for (int i=0; i<in.length; i++) out[i] = mapper.applyAsLong(in[i]);
+		return out;
+	}
+	/** Maps an array of objects to an array of chars */ 
+	public static <U> char[] mapChar(U[] in, ToCharFn<U> mapper) {
+		var out = new char[in.length];
+		for (int i=0; i<in.length; i++) out[i] = mapper.apply(in[i]);
 		return out; //stream(in).mapToLong(mapper).toArray();
 	}
 	/** Maps an array of objects to an array of shorts */ 
@@ -394,6 +400,11 @@ public class Objs {
 //JAVA9:			iterate(0, i->i<from.length, i->i+=size)
 				: IntStream.range(0, from.length/size).map(i->i*size)
 					.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
+	}
+
+	@FunctionalInterface
+	public static interface ToCharFn<T> {
+		public char apply(T head);
 	}
 
 	@FunctionalInterface
