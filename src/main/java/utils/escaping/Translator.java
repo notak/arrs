@@ -23,42 +23,19 @@ import static java.lang.Character.charCount;
 import static java.lang.Character.codePointAt;
 import static java.lang.Character.isHighSurrogate;
 import static java.lang.Character.isLowSurrogate;
-import static java.lang.Character.toChars;
 import static java.lang.Integer.parseInt;
-import static java.lang.Integer.toHexString;
 import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.sort;
-import static java.util.Locale.ENGLISH;
 import static utils.arrays.Ints.max;
 import static utils.arrays.Ints.min;
 import static utils.arrays.Objs.mapChar;
 import static utils.arrays.Objs.mapInt;
 import static utils.arrays.Objs.sorted;
 
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
-import java.util.function.IntFunction;
-
-import utils.arrays.Objs;
 
 /** Translate a set of codepoints, represented by an int index into a CharSequence,
  * into another set of codepoints. The number of codepoints consumed must be returned,
