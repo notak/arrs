@@ -4,6 +4,7 @@ import static java.lang.System.arraycopy;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 	
 import static java.util.Arrays.asList;
@@ -80,6 +81,12 @@ public class Ints {
 
 	public static <T> int[] toArray(int in) { 
 		int[] out = { in }; return out;
+	}
+
+	public static <T> int[] toArray(List<Integer> in) { 
+		var out = new int[in.size()];
+		for (int i=0; i<out.length; i++) out[i] = in.get(i);
+		return out; 
 	}
 
 	public static void forEach(int[] us, Consumer fn) {
