@@ -18,6 +18,10 @@ public class Numbers {
 		return parseInt(in, 10);
 	}
 	
+	public static Optional<Integer> parseHexInt(String in) {
+		return parseInt(in, 16);
+	}
+	
 	public static Optional<Double> parseDouble(String in) {
 		try {
 			return Optional.of(Double.parseDouble(in));

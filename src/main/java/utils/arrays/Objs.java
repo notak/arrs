@@ -87,10 +87,24 @@ public class Objs {
 	/** Optionally get the last element, returns empty for empty array */
 	public static <T> T last(T[] in, T def) { return nthLast(in, 0, def); }
 	
+	/** Maps an array to an array of objects of the same class*/ 
+	public static <T> T[] map(T[] in, Function<T, T> map) {
+		var out = copyOf(in, in.length);
+		for (int i=0; i<in.length; i++) out[i] = map.apply(out[i]);
+		return out;
+	}
+	
 	/** Maps an array of objects to an array of another object */ 
 	public static <T, U> U[] 
 	map(T[] in, Function<T, U> map, IntFunction<U[]> cons) {
-		return stream(in).map(map).toArray(cons);
+		var out = cons.apply(in.length);
+		for (int i=0; i<in.length; i++) out[i] = map.apply(in[i]);
+		return out;
+	}
+	/** Maps an array of objects to an array of another object */ 
+	public static <T, U> U[] 
+	flatMap(T[] in, Function<T, U[]> map, IntFunction<U[]> cons) {
+		return stream(in).map(map).flatMap(Arrays::stream).toArray(cons);
 	}
 	/** Maps an array of objects to an array of strings */ 
 	public static <T> String[] mapStr(T[] in, Function<T, String> mapper) {
@@ -104,6 +118,12 @@ public class Objs {
 	public static <U> long[] mapLong(U[] in, ToLongFunction<U> mapper) {
 		var out = new long[in.length];
 		for (int i=0; i<in.length; i++) out[i] = mapper.applyAsLong(in[i]);
+		return out;
+	}
+	/** Maps an array of objects to an array of chars */ 
+	public static <U> char[] mapChar(U[] in, ToCharFn<U> mapper) {
+		var out = new char[in.length];
+		for (int i=0; i<in.length; i++) out[i] = mapper.apply(in[i]);
 		return out; //stream(in).mapToLong(mapper).toArray();
 	}
 	/** Maps an array of objects to an array of shorts */ 
@@ -233,6 +253,14 @@ public class Objs {
 			}
 		}
 		return hay;
+	}
+	
+	public static <U> U[] replace(U[] hay, U needle, U replacement) {
+		int i = indexOf(hay, needle);
+		if (i<0) return hay;
+		var out = Arrays.copyOf(hay, hay.length);
+		out[i] = replacement;
+		return out;
 	}
 	
 	protected static <T> IntFunction<T[]> cons(T[] template) {
@@ -373,6 +401,11 @@ public class Objs {
 //JAVA9:			iterate(0, i->i<from.length, i->i+=size)
 				: IntStream.range(0, from.length/size).map(i->i*size)
 					.mapToObj(i->Arrays.copyOfRange(from, i, i+size));
+	}
+
+	@FunctionalInterface
+	public static interface ToCharFn<T> {
+		public char apply(T head);
 	}
 
 	@FunctionalInterface
