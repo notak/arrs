@@ -1,5 +1,10 @@
 package utils.stuff;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.util.stream.Collectors.joining;
+
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
@@ -9,17 +14,27 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.stream.Collectors;
+import java.nio.file.Path;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 import utils.stuff.Fns.LogFn;
 
 public class UTF8File {
-	public static final Charset UTF8 = Charset.forName("UTF-8");
+	public static final Charset UTF8 = UTF_8;
 	
 	public static String read(File f) {
-		return stream(f).collect(Collectors.joining("\n"));
+		return stream(f).collect(joining("\n"));
+	}
+
+	/** Appends a string to a file as UTF8 (creating the file if it doesn't
+	 * exist. Errors on problems rather than Excepting */
+	public static void append(Path p, String s) {
+		try {
+			Files.write(p, s.getBytes(UTF_8), APPEND, CREATE);
+		} catch (IOException e) {
+			throw new Error(e);
+		}
 	}
 
 	/** Reads the whole of short files to save closing issues */
