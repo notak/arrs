@@ -3,6 +3,7 @@ package utils.stuff;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -75,6 +76,11 @@ public class Chain<T> {
 	}
 	
 	public Chain<T> 
+	ifNotEmpty(String value, BiFunction<T, String, T> consumer) {
+		return ifTest(v->v!=null && !v.isEmpty(), consumer, value);
+	}
+	
+	public Chain<T> 
 	ifTrue(boolean val, BiFunction<T, Boolean, T> consumer) {
 		return ifTest(v->v, consumer, val);
 	}
@@ -123,6 +129,11 @@ public class Chain<T> {
 	ifMaps(U value, Map<U, V> map, BiFunction<T, V, T> fn) {
 		return value!=null && map.containsKey(value) ? 
 			getd(fn.apply(wraps, map.get(value))) : this;
+	}
+	
+	public static <U, V> void ifMaps(U val, Map<U, V> map, Consumer<V> fn) {
+		var mapped = map.get(val);
+		if (mapped!=null) fn.accept(mapped);
 	}
 	
 	public T complete() {
