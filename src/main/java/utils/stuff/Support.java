@@ -1,8 +1,8 @@
 package utils.stuff;
 
+import static java.lang.Runtime.getRuntime;
+
 import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -114,13 +114,18 @@ public class Support {
 		} catch (Exception e) { throw new Error(e); }
 	}
 
-	public static String hostname() throws IOException {
-        Process proc = Runtime.getRuntime().exec("hostname");
-        try (InputStream stream = proc.getInputStream()) {
-            try (Scanner s = new Scanner(stream)) {
-            	s.useDelimiter("\\A");
-                return s.hasNext() ? s.next() : "";
-            }
+	public static String hostname() {
+        try {
+			var proc = getRuntime().exec("hostname");
+	        try (var stream = proc.getInputStream(); 
+	        	var s = new Scanner(stream)
+	        ) {
+	            	s.useDelimiter("\\A");
+	                return s.hasNext() ? s.next() : "";
+	        } 
+        }
+        catch (Exception e) {
+        	return "";
         }
     }
 }
