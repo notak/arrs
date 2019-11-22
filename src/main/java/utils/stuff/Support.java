@@ -1,6 +1,8 @@
 package utils.stuff;
 
 import static java.lang.Runtime.getRuntime;
+import static utils.arrays.Objs.first;
+import static utils.stuff.Support.hostname;
 
 import java.io.Closeable;
 import java.nio.charset.Charset;
@@ -120,12 +122,17 @@ public class Support {
 	        try (var stream = proc.getInputStream(); 
 	        	var s = new Scanner(stream)
 	        ) {
-	            	s.useDelimiter("\\A");
-	                return s.hasNext() ? s.next() : "";
+            	s.useDelimiter("\\A");
+                return s.hasNext() ? s.next().replaceAll("\n", "") : "";
 	        } 
         }
         catch (Exception e) {
         	return "";
         }
     }
+	
+	/** The first part of the hostname */
+	public static String subhostname() {
+		return first(hostname().split("\\."), "unknown");
+	}
 }
