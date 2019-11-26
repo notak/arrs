@@ -311,6 +311,18 @@ public class Bytes {
 		return out;
 	}
 
+	public static byte[] append(byte[]... a) {
+		if (a.length==0) return EMPTY; 
+		else if (a.length==1) return a[0];
+		var sum = 0;
+		for (int i=0; i<a.length; i++) sum+=a[i].length;
+		byte[] out = new byte[sum];
+		for (int i=0, pos = 0; i<a.length; pos+=a[i++].length) {
+			arraycopy(a[i], 0, out, pos, a[i].length);
+		}
+		return out;
+	}
+
 	public static byte[] append(byte[] a, byte[] b) {
 		if (a.length==0) return b; else if (b.length==0) return a;
 		byte[] out = Arrays.copyOf(a, a.length + b.length);

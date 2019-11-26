@@ -9,7 +9,6 @@ import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.sort;
 import static java.util.Arrays.stream;
-import static java.util.Optional.of;
 
 import java.util.Map;
 
@@ -446,6 +445,10 @@ public class Objs {
 			Optional.of(map.apply(arr[0], arr[1], subArray(arr, 2)));
 	}
 	
+	public static <T> T[] sorted(T[] in, Function<T, Integer> sortBy) {
+		return sorted(in, (a,b)->sortBy.apply(a)-sortBy.apply(b));
+	}
+
 	public static <T> T[] sorted(T[] in, Comparator<T> sortBy) {
 		var out = Arrays.copyOf(in, in.length);
 		sort(out, sortBy);

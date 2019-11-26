@@ -1,5 +1,7 @@
 package utils.bytes;
 
+import static java.lang.Short.toUnsignedInt;
+
 import java.util.function.Consumer;
 
 public class LittleEndian {
@@ -14,6 +16,16 @@ public class LittleEndian {
 	/** little-endian conversion of byte[] to int, assumes a byte[4] */
 	public static int toInt(byte[] bytes) {
 		return toInt(bytes, 0 , 4);
+	}
+
+	/** little-endian conversion of byte[] to int, assumes a byte[2] */
+	public static short toShort(byte[] bytes) {
+		return (short)toInt(bytes, 0 , 2);
+	}
+
+	/** little-endian conversion of byte[] to short */
+	public static short toShort(byte[] bytes, int start, int len) {
+		return (short)toInt(bytes, start , len);
 	}
 
 	/** little-endian conversion of byte[] to int, assumes a byte[4] */
@@ -58,6 +70,16 @@ public class LittleEndian {
 		for (int i=0; i<len; i++) {
 			bytes[start+i] = (byte)(val >>> (8*i));
 		}
+	}
+
+	/** little-endian conversion of short to byte[]*/
+	public static void putShort(byte[] bytes, int start, short val) {
+		putInt(bytes, start, 2, toUnsignedInt(val));
+	}
+
+	/** little-endian conversion of short to byte[]*/
+	public static void putShort(byte[] bytes, int start, int len, short val) {
+		putInt(bytes, start, len, toUnsignedInt(val));
 	}
 
 	/** little-endian conversion of int to byte[]*/
