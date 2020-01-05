@@ -128,7 +128,7 @@ public class Bytes {
 	
 	/** Get the first element, or returning the provided default */
 	public static byte firstOr0(byte[] in) { 
-		return nth(in, 0, 0); 
+		return nth(in, 0, (byte)0); 
 	}
 	
 	/** Optionally get the last element, returns empty for empty array */
@@ -339,6 +339,14 @@ public class Bytes {
 		byte[] out = copyOf(a, a.length + 1);
 		out[a.length] = b;
 		return out;
+	}
+
+	public static byte fromBool(boolean set) {
+		return set ? (byte)1 : (byte)0;
+	}
+
+	public static boolean toBool(byte b) {
+		return b!=0;
 	}
 
 	public static byte[] union(byte[] a, byte b) {
