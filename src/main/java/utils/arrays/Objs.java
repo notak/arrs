@@ -105,6 +105,12 @@ public class Objs {
 	flatMap(T[] in, Function<T, U[]> map, IntFunction<U[]> cons) {
 		return stream(in).map(map).flatMap(Arrays::stream).toArray(cons);
 	}
+	/** Maps an array of objects into optionals, and returns an array of
+	 * the non-empty values */ 
+	public static <T, U> U[] 
+	optMap(T[] in, Function<T, Optional<U>> map, IntFunction<U[]> cons) {
+		return stream(in).map(map).flatMap(i->i.stream()).toArray(cons);
+	}
 	/** Maps an array of objects to an array of strings */ 
 	public static <T> String[] mapStr(T[] in, Function<T, String> mapper) {
 		return map(in, mapper, String[]::new);
