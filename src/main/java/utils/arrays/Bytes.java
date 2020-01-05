@@ -126,6 +126,11 @@ public class Bytes {
 		return nth(in, 0, def); 
 	}
 	
+	/** Get the first element, or returning the provided default */
+	public static byte firstOr0(byte[] in) { 
+		return nth(in, 0, 0); 
+	}
+	
 	/** Optionally get the last element, returns empty for empty array */
 	public static Optional<Byte> last(byte[] in) { return nthLast(in, 0); }
 
