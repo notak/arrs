@@ -2,7 +2,6 @@ package utils.encoders;
 
 public class ZigZag {
 	public static byte encode(byte n) {
-		System.out.println("byte");
 		return (byte)encode((int)n);
 	}
 	
@@ -11,7 +10,6 @@ public class ZigZag {
 	}
 
 	public static short encode(short n) {
-		System.out.println("short");
 		return (short)encode((int)n);
 	}
 	
@@ -20,7 +18,6 @@ public class ZigZag {
 	}
 
 	public static int encode(int n) {
-		System.out.println("int");
 		return (n << 1) ^ (n >> 31);
 	}
 	
@@ -30,7 +27,6 @@ public class ZigZag {
 	}
 
 	public static long encode(long n) {
-		System.out.println("long");
 		return (n << 1L) ^ (n >> 63);
 	}
 	
