@@ -204,6 +204,11 @@ public class Objs {
 		return -1;
 	}
 
+	public static <U> int indexOf(U[] hay, Predicate<U> test) {
+		for (int i=hay.length-1; i>=0; i--) if (test.test(hay[i])) return i;
+		return -1;
+	}
+
 	public static <U> int[] indexesOf(U[] hay, U[] needles) {
 		int[] out = Ints.EMPTY;
 		for (int i=hay.length-1; i>=0; i--) {
