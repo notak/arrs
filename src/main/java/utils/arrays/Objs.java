@@ -35,6 +35,9 @@ import utils.stuff.Fns;
 public class Objs {
 	
 	@SafeVarargs
+	public static <T> T[][] to2DArray(T[]... in) { return in; }
+	
+	@SafeVarargs
 	public static <T> T[] toArray(T... in) { return in; }
 	
 	public static <T> boolean eq(T[] a, T[] b) {
@@ -114,6 +117,10 @@ public class Objs {
 	/** Maps an array of objects to an array of strings */ 
 	public static <T> String[] mapStr(T[] in, Function<T, String> mapper) {
 		return map(in, mapper, String[]::new);
+	}
+	/** Maps an array of objects to an array of strings */ 
+	public static <T> String mapStr(T[] in, Function<T, String> mapper, String glue) {
+		return join(glue, map(in, mapper, String[]::new));
 	}
 	/** Maps an array of objects to an array of ints */ 
 	public static <U> int[] mapInt(U[] in, ToIntFunction<U> mapper) {
@@ -391,6 +398,13 @@ public class Objs {
 	/** Return a new array consisting of all elements of a followed by b */
 	public static <T> T[] append(T[] a, T b) {
 		T[] out = copyOf(a, a.length + 1);
+		out[a.length] = b;
+		return out;
+	}
+
+	/** Return a new array consisting of all elements of a followed by b */
+	public static <T> T[][] appendArray(T[][] a, T[] b) {
+		T[][] out = copyOf(a, a.length + 1);
 		out[a.length] = b;
 		return out;
 	}
