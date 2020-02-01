@@ -4,6 +4,7 @@ import static java.lang.Math.min;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
@@ -27,6 +28,7 @@ import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -105,6 +107,11 @@ public class Objs {
 	}
 	/** Maps an array of objects to an array of another object */ 
 	public static <T, U> U[] 
+	map(List<T> in, Function<T, U> map, IntFunction<U[]> cons) {
+		return in.stream().map(map).toArray(cons);
+	}
+	/** Maps an array of objects to an array of another object */ 
+	public static <T, U> U[] 
 	flatMap(T[] in, Function<T, U[]> map, IntFunction<U[]> cons) {
 		return stream(in).map(map).flatMap(Arrays::stream).toArray(cons);
 	}
@@ -119,8 +126,17 @@ public class Objs {
 		return map(in, mapper, String[]::new);
 	}
 	/** Maps an array of objects to an array of strings */ 
+	public static <T> String[] mapStr(List<T> in, Function<T, String> mapper) {
+		return in.stream().map(mapper).toArray(String[]::new);
+	}
+	/** Maps an array of objects to an array of strings */ 
 	public static <T> String mapStr(T[] in, Function<T, String> mapper, String glue) {
 		return join(glue, map(in, mapper, String[]::new));
+	}
+	/** Maps an array of objects to string */ 
+	public static <T> String
+	mapStr(List<T> in, Function<T, String> mapper, String glue) {
+		return in.stream().map(mapper).collect(joining(glue));
 	}
 	/** Maps an array of objects to an array of ints */ 
 	public static <U> int[] mapInt(U[] in, ToIntFunction<U> mapper) {
