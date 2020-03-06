@@ -123,4 +123,8 @@ public class LongToObjMap<T> {
 	public void forEach(BiConsumer<Long, T> action) {
 		for (int i=0; i<keys.length; i++) action.accept(keys[i], vals[i]);
 	}
+	
+	public int size() {
+		return this.keys.length;
+	}
 }
