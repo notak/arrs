@@ -2,7 +2,6 @@ package utils.stuff;
 
 import static java.lang.Runtime.getRuntime;
 import static utils.arrays.Objs.first;
-import static utils.stuff.Support.hostname;
 
 import java.io.Closeable;
 import java.nio.charset.Charset;

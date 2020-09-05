@@ -4,8 +4,6 @@ import static utils.arrays.Bytes.EMPTY;
 
 import java.nio.charset.StandardCharsets;
 
-import utils.arrays.Bytes;
-
 public class Utf8 {
 	public static String decode(byte[] data) {
 		return (data==null || data.length==0) ? ""
