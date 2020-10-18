@@ -24,6 +24,10 @@ public class CapsDigits {
 //		return encode(in);
 //	}
 //	
+	public static long encode(String in, String handleFirst) {
+		return encode(in, handleFirst.toCharArray());
+	}
+
 	public static long encode(String in, char ...handleFirst) {
 		if (in==null) return 0;
 		long out = 0;
@@ -38,12 +42,24 @@ public class CapsDigits {
 		return (int)encode(in, handleFirst);
 	}
 
+	public static int encodeToInt(String in, String handleFirst) {
+		return (int)encode(in, handleFirst.toCharArray());
+	}
+
 	public static short encodeToShort(String in, char ...handleFirst) {
 		return (short)encode(in, handleFirst);
 	}
 
+	public static short encodeToShort(String in, String handleFirst) {
+		return (short)encode(in, handleFirst.toCharArray());
+	}
+
 	public static byte encodeToByte(String in, char ...handleFirst) {
 		return (byte)encode(in, handleFirst);
+	}
+
+	public static byte encodeToByte(String in, String handleFirst) {
+		return (byte)encode(in, handleFirst.toCharArray());
 	}
 
 	public static char decodeChar(int i, char ...handleFirst) {
@@ -53,6 +69,10 @@ public class CapsDigits {
 		else if ((i-=26)<10) return (char)('0' + i);
 		else if ((i-=10)==1) return '*';
 		else return ' ';
+	}
+
+	public static String decode(long in, String handleFirst) {
+		return decode(in, handleFirst.toCharArray());
 	}
 
 	public static String decode(long in, char ...handleFirst) {

@@ -63,7 +63,7 @@ public final class MoniousParser {
 		}
 	}
 
-	public static byte[] encode(int idDiff, byte[] val, byte[] into, int[] start) {
+	private static int length(int idDiff, byte[] val) {
 		var len = 1;
 		if (idDiff>=7) len += highestOneBit(idDiff-7)/7 + 1;
 		var single = val.length==1 && val[0]<16;
@@ -71,12 +71,17 @@ public final class MoniousParser {
 			len += val.length;
 			if (val.length>=15) len += highestOneBit(val.length-15)/7 + 1;
 		}
+		return len;
+	}
+	
+	public static byte[] encode(int idDiff, byte[] val, byte[] into, int[] start) {
+		var len = length(idDiff, val);
 		while (into.length-start[0] < len) into = copyOf(into, into.length * 2);
 		into[start[0]++] = (byte)((min(idDiff, 7)<<5)
-			| (single ? (16 + val[0]) : min(val.length, 15)));
+			| (len==1 ? (16 + val[0]) : min(val.length, 15)));
 		if (idDiff>=7) varInt(into, start, idDiff-7);
 		if (val.length>=15) varInt(into, start, idDiff-15);
-		if (!single) arraycopy(val, 0, into, start[0], val.length);
+		if (len>1) arraycopy(val, 0, into, start[0], val.length);
 		return into;
 	}
 }
