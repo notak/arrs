@@ -2,10 +2,13 @@ package utils.encoders;
 
 import static java.lang.Byte.toUnsignedInt;
 import static java.lang.Integer.highestOneBit;
+import static java.lang.Integer.numberOfLeadingZeros;
 import static java.lang.Math.min;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
+
+import utils.stuff.Console;
 
 public final class MoniousParser {
 
@@ -62,26 +65,44 @@ public final class MoniousParser {
 			s[0] += len;
 		}
 	}
-
-	private static int length(int idDiff, byte[] val) {
-		var len = 1;
-		if (idDiff>=7) len += highestOneBit(idDiff-7)/7 + 1;
-		var single = val.length==1 && val[0]<16;
-		if (!single) {
-			len += val.length;
-			if (val.length>=15) len += highestOneBit(val.length-15)/7 + 1;
-		}
-		return len;
-	}
 	
+	private static byte[] extendInto(byte[] into, int requiredLen) {
+		while (into.length < requiredLen) {
+			into = copyOf(into, 1 + into.length * 2);
+		}
+		return into;
+	}
+
 	public static byte[] encode(int idDiff, byte[] val, byte[] into, int[] start) {
-		var len = length(idDiff, val);
-		while (into.length-start[0] < len) into = copyOf(into, into.length * 2);
-		into[start[0]++] = (byte)((min(idDiff, 7)<<5)
-			| (len==1 ? (16 + val[0]) : min(val.length, 15)));
+		if (val==null || val.length==0) return into;
+		if (val.length==1 && val[0]<16) return encodeSingle(idDiff, val[0], into, start);
+
+		var len = 1 + val.length;
+		if (idDiff>=7) len += (32-numberOfLeadingZeros(idDiff-7))/7 + 1;
+		if (val.length>=15) len += (32-numberOfLeadingZeros(val.length-15))/7 + 1;
+
+//		Console.printf("%d %d %d %d %d\n", len, idDiff, val.length, into.length, start[0]);
+		into = extendInto(into, start[0] + len);
+		
+		into[start[0]++] = (byte)((min(idDiff, 7)<<5) | min(val.length, 15));
+
 		if (idDiff>=7) varInt(into, start, idDiff-7);
-		if (val.length>=15) varInt(into, start, idDiff-15);
-		if (len>1) arraycopy(val, 0, into, start[0], val.length);
+		if (val.length>=15) varInt(into, start, val.length-15);
+
+		arraycopy(val, 0, into, start[0], val.length);
+		start[0]+=val.length;
+
+		return into;
+	}
+
+
+	public static byte[] encodeSingle(int idDiff, byte val, byte[] into, int[] start) {
+		if (val==0) return into;
+		var len = 1 + (idDiff>=7 ? (32-numberOfLeadingZeros(idDiff-7))/7 + 1 : 0);
+//		Console.printf("single %d %d %d %d\n", idDiff, val, into.length, start[0]);
+		extendInto(into, start[0] + len);
+		into[start[0]++] = (byte)((min(idDiff, 7)<<5) | (16 + val) );
+		if (idDiff>=7) varInt(into, start, idDiff-7);
 		return into;
 	}
 }
