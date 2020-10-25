@@ -1,5 +1,7 @@
 package utils.bytes;
 
+import static java.lang.Math.min;
+
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,7 +29,7 @@ public class Display {
 	/** prints a portion of a byte array as a series of padded binary strings, 
 	 * each prefixed with the byte's index in the array */
 	public static String paddedBinaryLine(byte[] in, int start, int width) {
-		return IntStream.range(start, start + width)
+		return IntStream.range(start, min(start + width, in.length))
 			.mapToObj(j->String.format("%3d %s", j, paddedBinary(in[j])))
 			.collect(Collectors.joining(", "));
 	}
@@ -36,7 +38,7 @@ public class Display {
 	 * with the byte's index in the array. The output is broken into lines of 
 	 * width bytes */
 	public static String paddedBinary(byte[] in, int width) {
-		return IntStream.range(0, in.length/width)
+		return IntStream.range(0, in.length/width + (in.length % width>0 ? 1 : 0))
 		.mapToObj(i->paddedBinaryLine(in, i * width, width))
 		.collect(Collectors.joining("\n"));
 	}

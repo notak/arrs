@@ -7,6 +7,11 @@ import static java.lang.Math.min;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
+import static utils.bytes.Display.bytesToHex;
+import static utils.bytes.Display.paddedBinary;
+import static utils.stuff.Console.printf;
+
+import java.util.Arrays;
 
 import utils.stuff.Console;
 
@@ -51,18 +56,22 @@ public final class MoniousParser {
 		while (s[0] < end) {
 			var header = toUnsignedInt(buf[s[0]++]);
 			var idDiff = header >>> 5;
+//			printf("Header is \"%s\"\n", paddedBinary((byte)header));
 			if (idDiff==7) idDiff = unVarInt(buf, s) + 7;
 			id += idDiff;
+//			Console.printf("id diff is %d, id is %d\n", idDiff, id);
 
 			if ((header & 16) != 0) {
 				single[0] = (byte)(header & 15);
+//				Console.println("singing " + single[0]);
 				f.onField(id, single, 0, 1);
+			} else {
+				var len = header & 15;
+				if (len==15) len = unVarInt(buf, s) + 15;
+//				Console.println("singing " + Arrays.toString(Arrays.copyOfRange(buf, s[0], s[0]+len)));
+				f.onField(id, buf, s[0], len);
+				s[0] += len;
 			}
-
-			var len = header & 15;
-			if (len==15) len = unVarInt(buf, s) + 15;
-			f.onField(id, buf, s[0], len);
-			s[0] += len;
 		}
 	}
 	
@@ -73,15 +82,19 @@ public final class MoniousParser {
 		return into;
 	}
 
+	private static final byte[] ZERO = { (byte)0 };
+	
 	public static byte[] encode(int idDiff, byte[] val, byte[] into, int[] start) {
-		if (val==null || val.length==0) return into;
-		if (val.length==1 && val[0]<16) return encodeSingle(idDiff, val[0], into, start);
+		if (val==null) return into;
+		if (val.length==0) val = ZERO;
+		if (val.length==1 && toUnsignedInt(val[0])<16) {
+			return encodeSingle(idDiff, val[0], into, start);
+		}
 
 		var len = 1 + val.length;
 		if (idDiff>=7) len += (32-numberOfLeadingZeros(idDiff-7))/7 + 1;
 		if (val.length>=15) len += (32-numberOfLeadingZeros(val.length-15))/7 + 1;
 
-//		Console.printf("%d %d %d %d %d\n", len, idDiff, val.length, into.length, start[0]);
 		into = extendInto(into, start[0] + len);
 		
 		into[start[0]++] = (byte)((min(idDiff, 7)<<5) | min(val.length, 15));
@@ -97,11 +110,9 @@ public final class MoniousParser {
 
 
 	public static byte[] encodeSingle(int idDiff, byte val, byte[] into, int[] start) {
-		if (val==0) return into;
 		var len = 1 + (idDiff>=7 ? (32-numberOfLeadingZeros(idDiff-7))/7 + 1 : 0);
-//		Console.printf("single %d %d %d %d\n", idDiff, val, into.length, start[0]);
-		extendInto(into, start[0] + len);
-		into[start[0]++] = (byte)((min(idDiff, 7)<<5) | (16 + val) );
+		into = extendInto(into, start[0] + len);
+		into[start[0]++] = (byte)((min(idDiff, 7)<<5) | (16 + toUnsignedInt(val)) );
 		if (idDiff>=7) varInt(into, start, idDiff-7);
 		return into;
 	}

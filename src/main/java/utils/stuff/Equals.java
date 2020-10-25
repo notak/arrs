@@ -25,7 +25,30 @@ public class Equals {
 	public static boolean equals(long a, long b) {
 		return a==b;
 	}
-//	public static <T> boolean equals(T[] a, T[] b) {
+	
+	public static boolean equalsUnset(Object a) {
+		return a==null;
+	}
+	public static boolean equalsUnset(boolean a) {
+		return !a;
+	}
+	public static boolean equalsUnset(char a) {
+		return a==0;
+	}
+//	public static boolean equals(byte a) {
+//		return a==b;
+//	}
+//	public static boolean equals(short a) {
+//		return a==b;
+//	}
+//	public static boolean equals(int a) {
+//		return a==b;
+//	}
+	public static boolean equalsUnset(long a) {
+		return a==0;
+	}
+
+	//	public static <T> boolean equals(T[] a, T[] b) {
 //		return Arrays.deepEquals(a, b);
 //	}
 //	public static boolean equals(boolean[] a, boolean[] b) {
