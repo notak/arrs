@@ -13,6 +13,7 @@ import static utils.stuff.Console.printf;
 
 import java.util.Arrays;
 
+import utils.bytes.Display;
 import utils.stuff.Console;
 
 public final class MoniousParser {
@@ -25,14 +26,13 @@ public final class MoniousParser {
 		int n = 0;
 		int i = 0;
 		byte b;
-		do n |= (b = buf[start[0]++]) << (7*i++); while (b<0);
+		do n |= (toUnsignedInt(b = buf[start[0]++]) & 127) << (7*i++); while (b<0);
 		return n;
 	}
 
 	public static void varInt(byte[] buf, int[] start, int val) {
 		do {
-			 buf[start[0]++] = (byte)(val & 127);
-			 val>>>=7;
+			 buf[start[0]++] = (byte)((val & 127) | (((val>>>=7) != 0) ? 128 : 0));
 		} while (val!=0);
 	}
 
@@ -57,7 +57,7 @@ public final class MoniousParser {
 			var header = toUnsignedInt(buf[s[0]++]);
 			var idDiff = header >>> 5;
 //			printf("Header is \"%s\"\n", paddedBinary((byte)header));
-			if (idDiff==7) idDiff = unVarInt(buf, s) + 7;
+			if (idDiff==7) idDiff += unVarInt(buf, s);
 			id += idDiff;
 //			Console.printf("id diff is %d, id is %d\n", idDiff, id);
 
@@ -69,6 +69,11 @@ public final class MoniousParser {
 				var len = header & 15;
 				if (len==15) len = unVarInt(buf, s) + 15;
 //				Console.println("singing " + Arrays.toString(Arrays.copyOfRange(buf, s[0], s[0]+len)));
+				if (s[0]+len>buf.length || len<0) {
+					printf("Going to fail with pos=%d len=%d buflen=%d id=%d %s\n", 
+						s[0], len, buf.length, id,
+						paddedBinary(copyOfRange(buf, Math.max(0, s[0]-5), s[0])));
+				}
 				f.onField(id, buf, s[0], len);
 				s[0] += len;
 			}
@@ -112,7 +117,7 @@ public final class MoniousParser {
 	public static byte[] encodeSingle(int idDiff, byte val, byte[] into, int[] start) {
 		var len = 1 + (idDiff>=7 ? (32-numberOfLeadingZeros(idDiff-7))/7 + 1 : 0);
 		into = extendInto(into, start[0] + len);
-		into[start[0]++] = (byte)((min(idDiff, 7)<<5) | (16 + toUnsignedInt(val)) );
+		into[start[0]++] = (byte)((min(idDiff, 7)<<5) | 16 | toUnsignedInt(val) );
 		if (idDiff>=7) varInt(into, start, idDiff-7);
 		return into;
 	}
