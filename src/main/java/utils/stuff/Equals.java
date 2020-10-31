@@ -26,6 +26,9 @@ public class Equals {
 		return a==b;
 	}
 	
+	public static boolean equalsUnset(String a) {
+		return a==null || a.isEmpty();
+	}
 	public static boolean equalsUnset(Object a) {
 		return a==null;
 	}

@@ -38,12 +38,20 @@ public class CapsDigits {
 		return out;
 	}
 
+	public static long capsDigits(String in, char ...handleFirst) {
+		return encode(in, handleFirst);
+	}
+
 	public static int encodeToInt(String in, char ...handleFirst) {
 		return (int)encode(in, handleFirst);
 	}
 
 	public static int encodeToInt(String in, String handleFirst) {
 		return (int)encode(in, handleFirst.toCharArray());
+	}
+
+	public static short capsDigitsShort(String in, char ...handleFirst) {
+		return encodeToShort(in, handleFirst);
 	}
 
 	public static short encodeToShort(String in, char ...handleFirst) {
@@ -75,6 +83,10 @@ public class CapsDigits {
 		return decode(in, handleFirst.toCharArray());
 	}
 
+	public static String capsDigits(long in, String handleFirst) {
+		return decode(in, handleFirst.toCharArray());
+	}
+
 	public static String decode(long in, char ...handleFirst) {
 		StringBuffer out = new StringBuffer();
 		int i;
@@ -86,4 +98,8 @@ public class CapsDigits {
 		return out.toString();
 	}
 	
+	public static String capsDigits(long in, char ...handleFirst) {
+		return decode(in, handleFirst);
+	}
+
 }
