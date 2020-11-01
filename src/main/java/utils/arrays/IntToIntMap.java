@@ -37,6 +37,14 @@ public class IntToIntMap {
 		}
 	}
 	
+	public int inc(int key) {
+		return inc(key, 1);
+	}
+	
+	public int inc(int key, int amt) {
+		return put(key, get(key) + amt);
+	}
+	
 	public int remove(int key) {
 		var pos = binarySearch(keys, key);
 		if (pos<0) return 0;

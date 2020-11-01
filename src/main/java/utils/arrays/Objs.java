@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.sort;
@@ -524,4 +525,19 @@ public class Objs {
 			mapping(p->subArray(p, 1), reducingToArray(cons)));
 	}
 	
+	public static class Sorted {
+		public static <T> T[] with(T[] vals, T val) {
+			var pos = binarySearch(vals, val);
+			return pos>=0 ? vals : insert(vals, -(pos+1), val);
+		}
+
+		public static <T> T[] without(T[] vals, T val) {
+			var pos = binarySearch(vals, val);
+			return pos<0 ? vals : spliced(vals, pos, 1);
+		}
+
+		public static <T> boolean contains(T[] vals, T val) {
+			return binarySearch(vals, val)>=0;
+		}
+	}
 }

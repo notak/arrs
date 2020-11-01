@@ -1,5 +1,7 @@
 package utils.bytes;
 
+import static java.lang.Integer.numberOfLeadingZeros;
+import static java.lang.Long.numberOfLeadingZeros;
 import static java.lang.Short.toUnsignedInt;
 
 import java.util.function.Consumer;
@@ -110,8 +112,7 @@ public class LittleEndian {
 	 * Returns the smallest possible array capable of representing the value. In
 	 * the case of 0 a zero-length array is returned */
 	public static byte[] encode(int val) {
-		var hibit = Integer.highestOneBit(val);
-		var size = hibit / 8 + (hibit % 8==0 ? 0 : 1);
+		var size = 4 - numberOfLeadingZeros(val)/8;
 		return fromInt(val, size);
 	}
 
@@ -161,8 +162,7 @@ public class LittleEndian {
 	 * Returns the smallest possible array capable of representing the value. In
 	 * the case of 0 a zero-length array is returned */
 	public static byte[] encode(long val) {
-		var hibit = (int)Long.highestOneBit(val);
-		var size = hibit / 8 + (hibit % 8==0 ? 0 : 1);
+		var size = 8 - numberOfLeadingZeros(val)/8;
 		return fromLong(val, size);
 	}
 

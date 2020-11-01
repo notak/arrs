@@ -2,10 +2,19 @@ package utils.encoders;
 
 import static java.lang.Byte.toUnsignedInt;
 import static java.lang.Integer.highestOneBit;
+import static java.lang.Integer.numberOfLeadingZeros;
 import static java.lang.Math.min;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
+import static utils.bytes.Display.bytesToHex;
+import static utils.bytes.Display.paddedBinary;
+import static utils.stuff.Console.printf;
+
+import java.util.Arrays;
+
+import utils.bytes.Display;
+import utils.stuff.Console;
 
 public final class MoniousParser {
 
@@ -17,14 +26,13 @@ public final class MoniousParser {
 		int n = 0;
 		int i = 0;
 		byte b;
-		do n |= (b = buf[start[0]++]) << (7*i++); while (b<0);
+		do n |= (toUnsignedInt(b = buf[start[0]++]) & 127) << (7*i++); while (b<0);
 		return n;
 	}
 
 	public static void varInt(byte[] buf, int[] start, int val) {
 		do {
-			 buf[start[0]++] = (byte)(val & 127);
-			 val>>>=7;
+			 buf[start[0]++] = (byte)((val & 127) | (((val>>>=7) != 0) ? 128 : 0));
 		} while (val!=0);
 	}
 
@@ -48,35 +56,68 @@ public final class MoniousParser {
 		while (s[0] < end) {
 			var header = toUnsignedInt(buf[s[0]++]);
 			var idDiff = header >>> 5;
-			if (idDiff==7) idDiff = unVarInt(buf, s) + 7;
+//			printf("Header is \"%s\"\n", paddedBinary((byte)header));
+			if (idDiff==7) idDiff += unVarInt(buf, s);
 			id += idDiff;
+//			Console.printf("id diff is %d, id is %d\n", idDiff, id);
 
 			if ((header & 16) != 0) {
 				single[0] = (byte)(header & 15);
+//				Console.println("singing " + single[0]);
 				f.onField(id, single, 0, 1);
+			} else {
+				var len = header & 15;
+				if (len==15) len = unVarInt(buf, s) + 15;
+//				Console.println("singing " + Arrays.toString(Arrays.copyOfRange(buf, s[0], s[0]+len)));
+				if (s[0]+len>buf.length || len<0) {
+					printf("Going to fail with pos=%d len=%d buflen=%d id=%d %s\n", 
+						s[0], len, buf.length, id,
+						paddedBinary(copyOfRange(buf, Math.max(0, s[0]-5), s[0])));
+				}
+				f.onField(id, buf, s[0], len);
+				s[0] += len;
 			}
-
-			var len = header & 15;
-			if (len==15) len = unVarInt(buf, s) + 15;
-			f.onField(id, buf, s[0], len);
-			s[0] += len;
 		}
 	}
-
-	public static byte[] encode(int idDiff, byte[] val, byte[] into, int[] start) {
-		var len = 1;
-		if (idDiff>=7) len += highestOneBit(idDiff-7)/7 + 1;
-		var single = val.length==1 && val[0]<16;
-		if (!single) {
-			len += val.length;
-			if (val.length>=15) len += highestOneBit(val.length-15)/7 + 1;
+	
+	private static byte[] extendInto(byte[] into, int requiredLen) {
+		while (into.length < requiredLen) {
+			into = copyOf(into, 1 + into.length * 2);
 		}
-		while (into.length-start[0] < len) into = copyOf(into, into.length * 2);
-		into[start[0]++] = (byte)((min(idDiff, 7)<<5)
-			| (single ? (16 + val[0]) : min(val.length, 15)));
+		return into;
+	}
+
+	private static final byte[] ZERO = { (byte)0 };
+	
+	public static byte[] encode(int idDiff, byte[] val, byte[] into, int[] start) {
+		if (val==null) return into;
+		if (val.length==1 && toUnsignedInt(val[0])<16) {
+			return encodeSingle(idDiff, val[0], into, start);
+		}
+
+		var len = 1 + val.length;
+		if (idDiff>=7) len += (32-numberOfLeadingZeros(idDiff-7))/7 + 1;
+		if (val.length>=15) len += (32-numberOfLeadingZeros(val.length-15))/7 + 1;
+
+		into = extendInto(into, start[0] + len);
+		
+		into[start[0]++] = (byte)((min(idDiff, 7)<<5) | min(val.length, 15));
+
 		if (idDiff>=7) varInt(into, start, idDiff-7);
-		if (val.length>=15) varInt(into, start, idDiff-15);
-		if (!single) arraycopy(val, 0, into, start[0], val.length);
+		if (val.length>=15) varInt(into, start, val.length-15);
+
+		arraycopy(val, 0, into, start[0], val.length);
+		start[0]+=val.length;
+
+		return into;
+	}
+
+
+	public static byte[] encodeSingle(int idDiff, byte val, byte[] into, int[] start) {
+		var len = 1 + (idDiff>=7 ? (32-numberOfLeadingZeros(idDiff-7))/7 + 1 : 0);
+		into = extendInto(into, start[0] + len);
+		into[start[0]++] = (byte)((min(idDiff, 7)<<5) | 16 | toUnsignedInt(val) );
+		if (idDiff>=7) varInt(into, start, idDiff-7);
 		return into;
 	}
 }
