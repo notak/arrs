@@ -91,7 +91,6 @@ public final class MoniousParser {
 	
 	public static byte[] encode(int idDiff, byte[] val, byte[] into, int[] start) {
 		if (val==null) return into;
-		if (val.length==0) val = ZERO;
 		if (val.length==1 && toUnsignedInt(val[0])<16) {
 			return encodeSingle(idDiff, val[0], into, start);
 		}
