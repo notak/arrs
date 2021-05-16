@@ -30,9 +30,6 @@ import java.io.StringWriter;
 
 import org.junit.jupiter.api.Test;
 
-import utils.escaping.JavaString;
-import utils.escaping.Translator;
-
 class JavaStringTest {
     private static final String FOO = "foo";
 

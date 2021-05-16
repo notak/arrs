@@ -5,9 +5,6 @@ import static utils.arrays.Ints.*;
 
 import org.junit.Test;
 
-import utils.arrays.Ints;
-import utils.arrays.Objs;
-
 public class IntsTest {
 
 	@Test

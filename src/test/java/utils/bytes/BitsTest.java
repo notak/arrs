@@ -4,8 +4,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import utils.bytes.Bits;
-
 public class BitsTest {
 	@Test
 	public void testGettingCoverageTo100() {

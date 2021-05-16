@@ -86,6 +86,14 @@ public class Objs {
 	/** Optionally get the last element, returns empty for empty array */
 	public static <T> T last(T[] in, T def) { return nthLast(in, 0, def); }
 	
+	/** Optionally get the last element, returning empty for an empty array */
+	public static <T> Optional<T> last(T[] in, Predicate<T> matcher) {
+		for (int i = in.length - 1; i >= 0; i--) {
+			if (matcher.test(in[i])) return Optional.of(in[i]);
+		}
+		return Optional.empty();
+	}
+	
 	/** Maps an array to an array of objects of the same class*/ 
 	public static <T> T[] map(T[] in, Function<T, T> map) {
 		var out = copyOf(in, in.length);

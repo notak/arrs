@@ -7,10 +7,6 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import utils.arrays.Shorts;
-import utils.arrays.Ints;
-import utils.arrays.Objs;
-
 public class ShortsTest {
 	@Test
 	public void testStreamGroups() {
