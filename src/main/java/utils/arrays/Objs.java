@@ -30,6 +30,7 @@ import java.util.stream.Collector;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import utils.json.JsonObject;
 import utils.stuff.Fns;
 
 public class Objs {
@@ -492,4 +493,86 @@ public class Objs {
 			mapping(p->subArray(p, 1), reducingToArray(cons)));
 	}
 	
+	/** {@link JsonArray} at the given index, 
+	 * or the default if it does not exist or is the wrong type. */
+	public static Object[] nthArray(Object[] from, int key, Object[] def) {
+		return from.length>=key && from[key] instanceof Object[] s ? s : def;
+	}
+
+	/** Returns the {@link Boolean} at the given index, 
+	 * or the default if it does not exist or is the wrong type. */
+	public static boolean nthBoolean(Object[] from, int key, Boolean def) {
+		return from.length>=key && from[key] instanceof Boolean s ? s : def;
+	}
+
+	/** {@link Double} at the given index, 
+	 * or the default if it does not exist or is the wrong type. */
+	public static double nthDouble(Object[] from, int key, double def) {
+		return from.length>=key && from[key] instanceof Number s 
+			? s.doubleValue() : def;
+	}
+
+	/** {@link Float} at the given index, 
+	 * or the default if it does not exist or is the wrong type. */
+	public static float nthFloat(Object[] from, int key, float def) {
+		return from.length>=key && from[key] instanceof Number s 
+			? s.floatValue() : def;
+	}
+
+	/** Returns the {@link Integer} at the given index, 
+	 * or the default if it does not exist or is the wrong type. */
+	public static int nthInt(Object[] from, int key, int def) {
+		return from.length>=key && from[key] instanceof Number s 
+			? s.intValue() : def;
+	}
+
+	/** {@link Long} at the given index, 
+	 * or the default if it does not exist or is the wrong type. */
+	public static long nthLong(Object[] from, int key, long def) {
+		return from.length>=key && from[key] instanceof Number s 
+			? s.longValue() : def;
+	}
+
+	/** {@link Number} at the given index, 
+	 * or the default if it does not exist or is the wrong type. */
+	public static Number nthNumber(Object[] from, int key, Number def) {
+		return from.length>=key && from[key] instanceof Number s ? s : def;
+	}
+
+	/** {@link JsonObject} at the given index, 
+	 * or the default if it does not exist or is the wrong type. */
+	public static JsonObject nthObject(Object[] from, int key, JsonObject def) {
+		return from.length>=key && from[key] instanceof JsonObject s ? s : def;
+	}
+
+	/** {@link String} at the given index, 
+	 * or the default if it does not exist or is the wrong type. */
+	public static String nthString(Object[] from, int key, String def) {
+		return from.length>=key && from[key] instanceof String s ? s : def;
+	}
+
+	/** Returns true if the array has an element at that index */
+	public static boolean has(Object[] from, int key) {
+		return from.length>=key;
+	}
+
+	/** Returns true if the array has a boolean element at that index. */
+	public static boolean isBoolean(Object[] from, int key) {
+		return from.length>=key && from[key] instanceof Boolean;
+	}
+
+	/** Returns true if the array has a null element at that index. */
+	public static boolean isNull(Object[] from, int key) {
+		return from.length>=key && from[key] == null;
+	}
+
+	/** Returns true if the array has a number element at that index. */
+	public static boolean isNumber(Object[] from, int key) {
+		return from.length>=key && from[key] instanceof Number;
+	}
+
+	/** Returns true if the array has a string element at that index. */
+	public static boolean isString(Object[] from, int key) {
+		return from.length>=key && from[key] instanceof String;
+	}
 }
