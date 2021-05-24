@@ -219,13 +219,13 @@ public final class JsonParser {
 	private Number parseNumber(Token tok) throws JsonParserException {
 		try {
 			var chars = tok.text();
+			if (tok.type()==TOK_DOUBLE) return parseDouble(tok.string());
+
 			// Quick parse for single-digits
 			if (chars.length == 1) return chars[0] - '0';
 			
 			var negative = chars[0] == '-';
 			if (chars.length == 2 && negative) return '0' - chars[1];
-
-			if (tok.type()==TOK_DOUBLE) return parseDouble(tok.string());
 
 			// HACK: Attempt to parse using the approximate best type for this
 			int length = negative ? chars.length - 1 : chars.length;

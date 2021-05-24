@@ -57,4 +57,8 @@ class JsonLazyNumber extends Number {
 	private Object writeReplace() {
 		return new BigDecimal(value);
 	}
+	
+	public String toString() {
+		return value;
+	}
 }

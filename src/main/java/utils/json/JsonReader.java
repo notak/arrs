@@ -126,7 +126,7 @@ public final class JsonReader {
 		case TOK_TRUE -> true;
 		case TOK_FALSE -> false;
 		case TOK_NULL -> null;
-		case TOK_NUMBER -> number();
+		case TOK_NUMBER, TOK_DOUBLE -> number();
 		case TOK_STRING -> string();
 		default -> {				
 			throw tokenMismatchException(
@@ -161,7 +161,7 @@ public final class JsonReader {
 	/** Parses the current value as a {@link Number}. */
 	public Number number() throws JsonParserException {
 		if (token.type() == TOK_NULL) return null;
-		return new JsonLazyNumber(token.string(), token.type()==TOK_DOUBLE);
+		return new JsonLazyNumber(token.string(), token.isDouble());
 	}
 
 	/** Parses the current value as a long. */
