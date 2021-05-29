@@ -19,7 +19,6 @@ import static java.lang.Character.toCodePoint;
 import static java.lang.Integer.toHexString;
 import static java.lang.reflect.Array.getLength;
 
-import java.io.Flushable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Array;

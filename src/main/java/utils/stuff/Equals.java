@@ -1,6 +1,5 @@
 package utils.stuff;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 public class Equals {

@@ -1,20 +1,13 @@
 package utils.encoders;
 
 import static java.lang.Byte.toUnsignedInt;
-import static java.lang.Integer.highestOneBit;
 import static java.lang.Integer.numberOfLeadingZeros;
 import static java.lang.Math.min;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
-import static utils.bytes.Display.bytesToHex;
 import static utils.bytes.Display.paddedBinary;
 import static utils.stuff.Console.printf;
-
-import java.util.Arrays;
-
-import utils.bytes.Display;
-import utils.stuff.Console;
 
 public final class MoniousParser {
 
@@ -87,7 +80,7 @@ public final class MoniousParser {
 		return into;
 	}
 
-	private static final byte[] ZERO = { (byte)0 };
+//	private static final byte[] ZERO = { (byte)0 };
 	
 	public static byte[] encode(int idDiff, byte[] val, byte[] into, int[] start) {
 		if (val==null) return into;

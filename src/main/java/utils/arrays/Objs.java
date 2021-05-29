@@ -615,6 +615,7 @@ public class Objs {
 	/** Returns true if the array has a string element at that index. */
 	public static boolean isString(Object[] from, int key) {
 		return from.length>=key && from[key] instanceof String;
+	}
 
 	public static class Sorted {
 		public static <T> T[] with(T[] vals, T val) {
