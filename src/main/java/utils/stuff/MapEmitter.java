@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import utils.arrays.IntToObjMap;
 import utils.arrays.Objs;
 import utils.stuff.Emitter.BaseEmitter;
 
@@ -53,6 +54,10 @@ implements Map<K, V> {
 	}
 	
 	public void send(Map<K, V>map, boolean init) {
+		send(new MapUpdate<>(map, null), init);
+	}
+
+	public void send(IntToObjMap<V>map, boolean init) {
 		send(new MapUpdate<>(map, null), init);
 	}
 

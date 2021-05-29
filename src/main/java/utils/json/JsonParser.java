@@ -109,6 +109,13 @@ public final class JsonParser {
 		public T from(InputStream stm) throws JsonParserException {
 			return new JsonParser(new JsonTokener(stm), lazyNumbers).parse(clazz);
 		}
+
+		/** Parses the current JSON type from a {@link String} */
+		public T erroringFrom(String s) {
+			try {
+				return from(s);
+			} catch (Exception e) { throw new Error(e); }
+		}
 	}
 
 	private final JsonTokener tokener;

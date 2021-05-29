@@ -32,6 +32,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import utils.arrays.Objs;
 import utils.json.JsonParser.JsonParserException;
 import utils.json.JsonWriter.JsonWriterException;
 
@@ -273,8 +274,11 @@ public class JsonWriterTest {
 	 */
 	@Test
 	public void testArray() {
-		String json = JsonWriter.string().array().value(true).value(false)
-				.value(true).end().done();
+		var json = JsonWriter.string().value(toArray(false, 2, "three")).done();
+		assertEquals("[false,2,\"three\"]", json);
+	
+		json = JsonWriter.string().array().value(true).value(false)
+			.value(true).end().done();
 		assertEquals("[true,false,true]", json);
 	}
 
