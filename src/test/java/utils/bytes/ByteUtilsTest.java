@@ -16,7 +16,6 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import utils.bytes.LittleEndian;
 import utils.encoders.Base64;
 
 public class ByteUtilsTest {

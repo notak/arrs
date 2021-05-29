@@ -7,10 +7,6 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import utils.arrays.Bytes;
-import utils.arrays.Ints;
-import utils.arrays.Objs;
-
 public class BytesTest {
 	@Test
 	public void testStreamGroups() {

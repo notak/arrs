@@ -7,9 +7,6 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import utils.arrays.Ints;
-import utils.arrays.Objs;
-
 public class ObjsTest {
 	@Test
 	public void testStreamGroups() {

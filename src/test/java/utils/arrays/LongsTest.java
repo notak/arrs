@@ -5,10 +5,6 @@ import static utils.arrays.Longs.*;
 
 import org.junit.Test;
 
-import utils.arrays.Ints;
-import utils.arrays.Longs;
-import utils.arrays.Objs;
-
 public class LongsTest {
 
 	@Test
