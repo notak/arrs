@@ -35,6 +35,14 @@ public class LongToIntMap {
 		}
 	}
 	
+	public int inc(long key) {
+		return inc(key, 1);
+	}
+	
+	public int inc(long key, int amt) {
+		return put(key, get(key) + amt);
+	}
+	
 	public int remove(long key) {
 		var pos = binarySearch(keys, key);
 		if (pos<0) return 0;

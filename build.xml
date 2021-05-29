@@ -56,6 +56,7 @@ sed s/long/int/g src/main/java/utils/arrays/Longs.java \
             includeantruntime="false"
             srcdir="src/main/java" 
             destdir="target/classes"
+            debug="true"
         />
     </target>
 

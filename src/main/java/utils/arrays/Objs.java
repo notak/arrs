@@ -4,7 +4,9 @@ import static java.lang.Math.min;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
+import static java.util.Arrays.binarySearch;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.sort;
@@ -34,6 +36,9 @@ import utils.json.JsonObject;
 import utils.stuff.Fns;
 
 public class Objs {
+	
+	@SafeVarargs
+	public static <T> T[][] to2DArray(T[]... in) { return in; }
 	
 	@SafeVarargs
 	public static <T> T[] toArray(T... in) { return in; }
@@ -111,12 +116,36 @@ public class Objs {
 	}
 	/** Maps an array of objects to an array of another object */ 
 	public static <T, U> U[] 
+	map(List<T> in, Function<T, U> map, IntFunction<U[]> cons) {
+		return in.stream().map(map).toArray(cons);
+	}
+	/** Maps an array of objects to an array of another object */ 
+	public static <T, U> U[] 
 	flatMap(T[] in, Function<T, U[]> map, IntFunction<U[]> cons) {
 		return stream(in).map(map).flatMap(Arrays::stream).toArray(cons);
+	}
+	/** Maps an array of objects into optionals, and returns an array of
+	 * the non-empty values */ 
+	public static <T, U> U[] 
+	optMap(T[] in, Function<T, Optional<U>> map, IntFunction<U[]> cons) {
+		return stream(in).map(map).flatMap(i->i.stream()).toArray(cons);
 	}
 	/** Maps an array of objects to an array of strings */ 
 	public static <T> String[] mapStr(T[] in, Function<T, String> mapper) {
 		return map(in, mapper, String[]::new);
+	}
+	/** Maps an array of objects to an array of strings */ 
+	public static <T> String[] mapStr(List<T> in, Function<T, String> mapper) {
+		return in.stream().map(mapper).toArray(String[]::new);
+	}
+	/** Maps an array of objects to an array of strings */ 
+	public static <T> String mapStr(T[] in, Function<T, String> mapper, String glue) {
+		return join(glue, map(in, mapper, String[]::new));
+	}
+	/** Maps an array of objects to string */ 
+	public static <T> String
+	mapStr(List<T> in, Function<T, String> mapper, String glue) {
+		return in.stream().map(mapper).collect(joining(glue));
 	}
 	/** Maps an array of objects to an array of ints */ 
 	public static <U> int[] mapInt(U[] in, ToIntFunction<U> mapper) {
@@ -204,6 +233,11 @@ public class Objs {
 
 	public static <U> int indexOf(U[] hay, U needle) {
 		for (int i=hay.length-1; i>=0; i--) if (needle.equals(hay[i])) return i;
+		return -1;
+	}
+
+	public static <U> int indexOf(U[] hay, Predicate<U> test) {
+		for (int i=hay.length-1; i>=0; i--) if (test.test(hay[i])) return i;
 		return -1;
 	}
 
@@ -393,6 +427,13 @@ public class Objs {
 		return out;
 	}
 
+	/** Return a new array consisting of all elements of a followed by b */
+	public static <T> T[][] appendArray(T[][] a, T[] b) {
+		T[][] out = copyOf(a, a.length + 1);
+		out[a.length] = b;
+		return out;
+	}
+
 	public static <T> T[] union(T[] a, T b) {
 		return (contains(a,  b)) ? a : append(a, b);
 	}
@@ -574,5 +615,20 @@ public class Objs {
 	/** Returns true if the array has a string element at that index. */
 	public static boolean isString(Object[] from, int key) {
 		return from.length>=key && from[key] instanceof String;
+
+	public static class Sorted {
+		public static <T> T[] with(T[] vals, T val) {
+			var pos = binarySearch(vals, val);
+			return pos>=0 ? vals : insert(vals, -(pos+1), val);
+		}
+
+		public static <T> T[] without(T[] vals, T val) {
+			var pos = binarySearch(vals, val);
+			return pos<0 ? vals : spliced(vals, pos, 1);
+		}
+
+		public static <T> boolean contains(T[] vals, T val) {
+			return binarySearch(vals, val)>=0;
+		}
 	}
 }
